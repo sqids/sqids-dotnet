@@ -1,9 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputType>Library</OutputType>
+
+		<PackageId>Sqids</PackageId>
+		<Version>1.0.0-preview.1</Version>
+		<Description>Official .NET port of Sqids. Generate short YouTube-looking IDs from numbers.</Description>
+		<PackageTags>Sqids;ID-generator;number-obfuscator;YouTube</PackageTags>
+		<PackageIconUrl>https://raw.githubusercontent.com/sqids/sqids-dotnet/main/icon.png</PackageIconUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReleaseNotes>https://github.com/sqids/sqids-dotnet/releases</PackageReleaseNotes>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://sqids.org/dotnet</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Authors>Arad Alvand</Authors>
+		<Company>Sqids</Company>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/sqids/sqids-dotnet</RepositoryUrl>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>

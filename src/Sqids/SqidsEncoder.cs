@@ -5,7 +5,8 @@
 /// </summary>
 public class SqidsEncoder
 {
-	private const int _minAlphabetLength = 5;
+	private const int MinAlphabetLength = 5;
+
 	private readonly SqidsOptions _options;
 
 	/// <summary>
@@ -35,7 +36,7 @@ public class SqidsEncoder
 	/// </param>
 	public SqidsEncoder(SqidsOptions options)
 	{
-		if (options.Alphabet.Length < _minAlphabetLength)
+		if (options.Alphabet.Length < MinAlphabetLength)
 			throw new ArgumentException("The alphabet must contain at least 5 characters.");
 
 		if (options.Alphabet.Distinct().Count() != options.Alphabet.Length)
@@ -66,7 +67,7 @@ public class SqidsEncoder
 	/// Encodes one or more integers into a Sqids ID.
 	/// </summary>
 	/// <param name="numbers">The array of integers to encode.</param>
-	/// <returns>A string containing the encoded ID(s), or an empty string if array passed is empty.</returns>
+	/// <returns>A string containing the encoded ID(s), or an empty string if the array passed is empty.</returns>
 	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
 	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
 	public string Encode(params int[] numbers)
@@ -83,7 +84,7 @@ public class SqidsEncoder
 	/// <summary>
 	/// Decodes a string into its original .
 	/// </summary>
-	/// <param name="numbers">The encoded ID.</param>
+	/// <param name="id">The encoded ID.</param>
 	/// <returns>
 	/// A collection of integers containing the decoded number(s); or empty an collection if the
 	/// input string is null, empty, contains fewer characters than the configured minimum length,
@@ -131,15 +132,15 @@ public class SqidsEncoder
 			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` to the left of the separator is the number that we ought to decode.
 			id = id[chunk.Length..].TrimStart(separator); // NOTE: The `id` for the next iteration would exclude the current `chunk` (and also any following comma, if there is one)
 
-			if (!chunk.IsEmpty)
-			{
-				var alphabetWithoutSeparator = alphabetTemp[..^1]; // NOTE: Exclude the last character from the alphabet (which is the separator)
-				var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
-				result.Add(decodedNumber);
+			if (chunk.IsEmpty)
+				continue;
 
-				if (!id.IsEmpty)
-					ConsistentShuffle(alphabetTemp);
-			}
+			var alphabetWithoutSeparator = alphabetTemp[..^1]; // NOTE: Exclude the last character from the alphabet (which is the separator)
+			var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
+			result.Add(decodedNumber);
+
+			if (!id.IsEmpty)
+				ConsistentShuffle(alphabetTemp);
 		}
 
 		return result;
@@ -174,18 +175,18 @@ public class SqidsEncoder
 			var encodedNumber = ToId(number, alphabetWithoutSeparator);
 			builder.Append(encodedNumber);
 
-			if (i < numbers.Length - 1) // NOTE: If not the last
-			{
-				char separator = alphabetTemp[^1]; // NOTE: Exclude the last character
+			if (i >= numbers.Length - 1) // NOTE: If the last one
+				continue;
 
-				builder.Append(
-					partitioned && i == 0
-						? partition
-						: separator
-				);
+			char separator = alphabetTemp[^1]; // NOTE: Exclude the last character
 
-				ConsistentShuffle(alphabetTemp);
-			}
+			builder.Append(
+				partitioned && i == 0
+					? partition
+					: separator
+			);
+
+			ConsistentShuffle(alphabetTemp);
 		}
 
 		string result = builder.ToString(); // TODO: preferably don't `ToString()` this early
@@ -202,8 +203,8 @@ public class SqidsEncoder
 
 			if (result.Length < _options.MinLength)
 			{
-				var LeftToMeetMinLength = _options.MinLength - result.Length;
-				var paddingFromAlphabet = alphabetTemp[..LeftToMeetMinLength];
+				var leftToMeetMinLength = _options.MinLength - result.Length;
+				var paddingFromAlphabet = alphabetTemp[..leftToMeetMinLength];
 				builder.Insert(1, paddingFromAlphabet);
 				result = builder.ToString();
 			}
@@ -239,9 +240,13 @@ public class SqidsEncoder
 			if (word.Length > id.Length)
 				continue;
 
-			if ((id.Length <= 3 || word.Length <= 3) && id.Equals(word, StringComparison.OrdinalIgnoreCase))
+			if ((id.Length <= 3 || word.Length <= 3) &&
+			    id.Equals(word, StringComparison.OrdinalIgnoreCase))
 				return true;
-			if (word.Any(char.IsDigit) && (id.StartsWith(word, StringComparison.OrdinalIgnoreCase) || id.EndsWith(word, StringComparison.OrdinalIgnoreCase)))
+
+			if (word.Any(char.IsDigit) &&
+				(id.StartsWith(word, StringComparison.OrdinalIgnoreCase) ||
+				 id.EndsWith(word, StringComparison.OrdinalIgnoreCase)))
 				return true;
 			if (id.Contains(word, StringComparison.OrdinalIgnoreCase))
 				return true;
@@ -280,11 +285,8 @@ public class SqidsEncoder
 	private static int ToNumber(ReadOnlySpan<char> id, ReadOnlySpan<char> alphabet)
 	{
 		int result = 0;
-		for (int i = 0; i < id.Length; i++)
-		{
-			char character = id[i];
+		foreach (var character in id)
 			result = result * alphabet.Length + alphabet.IndexOf(character);
-		}
 		return result;
 	}
 }

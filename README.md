@@ -4,11 +4,38 @@ Sqids (pronounced "squids") is a small library that lets you generate YouTube-lo
 
 ## Getting started
 
-@todo
+Install the [NuGet package](https://nuget.org/packages/Sqids):
+
+```sh
+Install-Package Sqids
+```
+
+Alternatively, using the .NET CLI:
+
+```sh
+dotnet add package Sqids
+```
+
+Basic usage:
+
+```cs
+using Sqids;
+
+var sqids = new SqidsEncoder();
+string id = sqids.Encode(123); // id = 'UfB'
+int number = sqids.Decode(id).Single(); // number = '123'
+```
 
 ## Examples
 
-@todo
+DI usage:
+
+```cs
+services.AddSingleton(new SqidsEncoder(new()
+{
+    Alphabet = "djpo9831",
+}));
+```
 
 ## License
 
