@@ -1,16 +1,39 @@
 ﻿namespace Sqids;
 
 // TODO: the suffix `Encoder` may be more accurate
+/// <summary>
+/// Initializes a new instance of <see cref="SqidsGenerator" /> with the default options.
+/// </summary>
 public class SqidsGenerator
 {
 	private const int _minAlphabetLength = 5;
 	private readonly SqidsOptions _options;
 
+	/// <summary>
+	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsGenerator" />.
+	/// It's always zero across all ports of Sqids.
+	/// </summary>
 	public const int MinValue = 0;
+
+	/// <summary>
+	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsGenerator" />.
+	/// It's equal to `int.MaxValue`.
+	/// </summary>
 	public const int MaxValue = int.MaxValue;
 
+	/// <summary>
+	/// Initializes a new instance of <see cref="SqidsGenerator" /> with the default options.
+	/// </summary>
 	public SqidsGenerator() : this(new()) { }
 
+	/// <summary>
+	/// Initializes a new instance of <see cref="SqidsGenerator" /> with custom options.
+	/// </summary>
+	/// <param name="options">
+	/// The custom options.
+	/// All properties of <see cref="SqidsOptions" /> are optional and will fall back to their
+	/// defaults unless explicitly set.
+	/// </param>
 	public SqidsGenerator(SqidsOptions options)
 	{
 		if (options.Alphabet.Length < _minAlphabetLength)
@@ -40,6 +63,13 @@ public class SqidsGenerator
 		_options = options;
 	}
 
+	/// <summary>
+	/// Encodes one or more integers into a Sqids ID.
+	/// </summary>
+	/// <param name="numbers">The array of integers to encode.</param>
+	/// <returns>A string containing the encoded ID(s), or an empty string if array passed is empty.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
 	public string Encode(params int[] numbers)
 	{
 		if (numbers.Length == 0)
@@ -51,6 +81,15 @@ public class SqidsGenerator
 		return EncodeNumbers(numbers);
 	}
 
+	/// <summary>
+	/// Decodes a string into its original .
+	/// </summary>
+	/// <param name="numbers">The encoded ID.</param>
+	/// <returns>
+	/// A collection of integers containing the decoded number(s); or empty an collection if the
+	/// input string is null, empty, contains fewer characters than the configured minimum length,
+	/// or includes characters not found in the alphabet.
+	/// </returns>
 	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
 	{
 		if (id.IsEmpty)
@@ -177,7 +216,7 @@ public class SqidsGenerator
 			if (partitioned)
 			{
 				if (numbers[0] + 1 > MaxValue)
-					throw new Exception("Ran out of range checking against the blocklist.");
+					throw new OverflowException("Ran out of range checking against the blocklist.");
 				else
 					newNumbers[0] += 1;
 			}

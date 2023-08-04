@@ -1,24 +1,29 @@
 namespace Sqids;
 
+/// <summary>
+/// Custom alphabet that will be used for the IDs.
+/// Must contain at least 5 characters.
+/// The default is lowercase letters, uppercase letters, and digits.
+/// </summary>
 public class SqidsOptions
 {
 	/// <summary>
-	/// Custom alphabet that will be used for the generated IDs.
+	/// Custom alphabet that will be used for the IDs.
 	/// Must contain at least 5 characters.
 	/// The default is lowercase letters, uppercase letters, and digits.
 	/// </summary>
 	public string Alphabet { get; set; } = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 	/// <summary>
-	/// The minimum length for the generated IDs.
+	/// The minimum length for the IDs.
 	/// The default is 0; meaning the IDs will be as short as possible.
 	/// </summary>
 	public int MinLength { get; set; } = 0;
 
 	/// <summary>
-	/// List of blocked words that must not appear in the generated IDs.
+	/// List of blocked words that must not appear in the IDs.
 	/// </summary>
-	public HashSet<string> BlockList { get; set; } = new() // todo: should this be a hash set? we don't do lookups on it, we iterate over it
+	public HashSet<string> BlockList { get; set; } = new() // todo: should this be a hash set? we don't do lookups on it, we merely iterate over it
 	{
 		"0rgasm",
 		"1d10t",
