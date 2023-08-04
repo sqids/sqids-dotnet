@@ -7,7 +7,7 @@ public class MinLengthTests
 	[InlineData(int.MinValue)]
 	public void Constructor_MinLengthTooSmall_Throws(int minLength)
 	{
-		var act = () => new SqidsGenerator(new()
+		var act = () => new SqidsEncoder(new()
 		{
 			MinLength = minLength,
 		});
@@ -19,7 +19,7 @@ public class MinLengthTests
 	[InlineData("0123456789")]
 	public void Constructor_MinLengthBiggerThanAlphabetLength_Throws(string alphabet)
 	{
-		var act = () => new SqidsGenerator(new()
+		var act = () => new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 			MinLength = alphabet.Length + 1,
@@ -32,7 +32,7 @@ public class MinLengthTests
 	[InlineData("0123456789")]
 	public void Constructor_ValidMinLength_DoesNotThrow(string alphabet)
 	{
-		var act = () => new SqidsGenerator(new()
+		var act = () => new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 			MinLength = alphabet.Length / 2,
@@ -52,16 +52,16 @@ public class MinLengthTests
 		string expected
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			MinLength = minLength,
 		});
-		var encoded = generator.Encode(numbers);
+		var encoded = encoder.Encode(numbers);
 		encoded.Should().Be(expected);
 	}
 
 	[Theory]
-	[InlineData(5, "SurCu", new[] { SqidsGenerator.MinValue })]
+	[InlineData(5, "SurCu", new[] { SqidsEncoder.MinValue })]
 	[InlineData(7, "nhERZME", new[] { 1 })]
 	[InlineData(10, "4gMAwl7dM0", new[] { 100 })]
 	[InlineData(23, "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtT1cd0dL", new[] { 1, 2, 3 })]
@@ -71,11 +71,11 @@ public class MinLengthTests
 		int[] expected
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			MinLength = minLength,
 		});
-		var decoded = generator.Decode(id);
+		var decoded = encoder.Decode(id);
 		decoded.Should().BeEquivalentTo(expected);
 	}
 
@@ -88,11 +88,11 @@ public class MinLengthTests
 		string id
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			MinLength = minLength,
 		});
-		var decoded = generator.Decode(id);
+		var decoded = encoder.Decode(id);
 		decoded.Should().BeEmpty();
 	}
 }

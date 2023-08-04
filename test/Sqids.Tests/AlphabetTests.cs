@@ -12,7 +12,7 @@ public class AlphabetTests
 	[InlineData("01234567789")]
 	public void Constructor_InvalidAlphabet_Throws(string alphabet)
 	{
-		var act = () => new SqidsGenerator(new()
+		var act = () => new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 		});
@@ -25,7 +25,7 @@ public class AlphabetTests
 	[InlineData("0123456789abcedfghijklmnop!@#$%^&*()")]
 	public void Constructor_ValidAlphabet_DoesNotThrow(string alphabet)
 	{
-		var act = () => new SqidsGenerator(new()
+		var act = () => new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 		});
@@ -42,11 +42,11 @@ public class AlphabetTests
 		string expected
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 		});
-		var encoded = generator.Encode(number);
+		var encoded = encoder.Encode(number);
 		encoded.Should().Be(expected); // todo: only check the characters?
 	}
 
@@ -60,11 +60,11 @@ public class AlphabetTests
 		int expected
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 		});
-		var decoded = generator.Decode(id);
+		var decoded = encoder.Decode(id);
 		decoded.Should().BeEquivalentTo(new[] { expected });
 	}
 
@@ -76,11 +76,11 @@ public class AlphabetTests
 		string id
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			Alphabet = alphabet,
 		});
-		var decoded = generator.Decode(id);
+		var decoded = encoder.Decode(id);
 		decoded.Should().BeEmpty();
 	}
 }

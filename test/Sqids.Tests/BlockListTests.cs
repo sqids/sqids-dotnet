@@ -9,8 +9,8 @@ public class BlockListTests
 		string defaultBlockedEncoded
 	)
 	{
-		var generator = new SqidsGenerator();
-		var encoded = generator.Encode(number);
+		var encoder = new SqidsEncoder();
+		var encoded = encoder.Encode(number);
 		encoded.Should().NotBe(defaultBlockedEncoded);
 	}
 
@@ -21,8 +21,8 @@ public class BlockListTests
 		int expected
 	)
 	{
-		var generator = new SqidsGenerator();
-		var encoded = generator.Decode(id);
+		var encoder = new SqidsEncoder();
+		var encoded = encoder.Decode(id);
 		encoded.Should().BeEquivalentTo(new[] { expected });
 	}
 
@@ -33,11 +33,11 @@ public class BlockListTests
 		string expected
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new(),
 		});
-		var encoded = generator.Encode(number);
+		var encoded = encoder.Encode(number);
 		encoded.Should().Be(expected);
 	}
 
@@ -48,11 +48,11 @@ public class BlockListTests
 		string normalEncoded
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new() { normalEncoded },
 		});
-		var encoded = generator.Encode(number);
+		var encoded = encoder.Encode(number);
 		encoded.Should().NotBe(normalEncoded);
 	}
 
@@ -64,11 +64,11 @@ public class BlockListTests
 		string byDefaultBlockedEncoded
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new(blocklist),
 		});
-		var encoded = generator.Encode(number);
+		var encoded = encoder.Encode(number);
 		encoded.Should().Be(byDefaultBlockedEncoded);
 	}
 
@@ -79,36 +79,36 @@ public class BlockListTests
 		string normalEncoded
 	)
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new()
 			{
 				normalEncoded[3..] // NOTE: First four characters
 			},
 		});
-		var encoded = generator.Encode(number);
+		var encoded = encoder.Encode(number);
 		encoded.Should().NotBe(normalEncoded);
 	}
 
 	[Fact]
 	public void Encode_WithTooShortBlockListWords_RemovesFromBlockList()
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new() { "U9" } // NOTE: `U9` is the normal encoding of `1`, and it's less than 3 characters, so its inclusion in the blocklist shouldn't not actually make a difference.
 		});
-		var encoded = generator.Encode(1);
+		var encoded = encoder.Encode(1);
 		encoded.Should().Be("U9");
 	}
 
 	[Fact]
 	public void Encode_WithCustomBlockList_IgnoresCasing()
 	{
-		var generator = new SqidsGenerator(new()
+		var encoder = new SqidsEncoder(new()
 		{
 			BlockList = new() { "uAVP" } // `Uavp` is the normal encoding of `98765` — we block a different casing of it, and we expect it to be blocked, since the blocklist should work case-insensitively.
 		});
-		var encoded = generator.Encode(98765);
+		var encoded = encoder.Encode(98765);
 		encoded.Should().NotBe("Uavp");
 	}
 }

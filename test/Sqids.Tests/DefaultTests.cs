@@ -4,7 +4,7 @@ public class DefaultTests
 {
 	// todo: with custom alphabet
 	// todo: with custom min length
-	private readonly SqidsGenerator _generator = new(); // todo: here or in the methods?
+	private readonly SqidsEncoder _encoder = new(); // todo: here or in the methods?
 
 	[Theory]
 	[InlineData(1, "U9")]
@@ -16,11 +16,11 @@ public class DefaultTests
 	[InlineData(123_456, "HvNP")]
 	[InlineData(32_129, "2mCX")]
 	[InlineData(45_923, "tZnR")]
-	[InlineData(SqidsGenerator.MinValue, "bV")]
-	[InlineData(SqidsGenerator.MaxValue, "UwFNcZQ")]
+	[InlineData(SqidsEncoder.MinValue, "bV")]
+	[InlineData(SqidsEncoder.MaxValue, "UwFNcZQ")]
 	public void Encode_SingleNumber_ReturnsRightId(int number, string expected)
 	{
-		var encoded = _generator.Encode(number);
+		var encoded = _encoder.Encode(number);
 		encoded.Should().Be(expected);
 	}
 
@@ -34,7 +34,7 @@ public class DefaultTests
 	[InlineData(new[] { 23, 129, 1892, 83, 9, 0, 12, 38, 9 }, "H2VQqalFJ6kwtUkUK242L")]
 	public void Encode_MultipleNumbers_ReturnsRightId(int[] numbers, string expected)
 	{
-		var encoded = _generator.Encode(numbers);
+		var encoded = _encoder.Encode(numbers);
 		encoded.Should().Be(expected);
 	}
 
@@ -44,14 +44,14 @@ public class DefaultTests
 	[InlineData(int.MinValue)]
 	public void Encode_NegativeNumber_Throws(int input)
 	{
-		var encoding = () => _generator.Encode(input);
+		var encoding = () => _encoder.Encode(input);
 		encoding.Should().Throw<ArgumentOutOfRangeException>();
 	}
 
 	[Fact]
 	public void Encode_EmptyArray_ReturnsEmptyString()
 	{
-		var encoded = _generator.Encode(new int[] { });
+		var encoded = _encoder.Encode(new int[] { });
 		encoded.Should().Be(string.Empty);
 	}
 
@@ -65,12 +65,12 @@ public class DefaultTests
 	[InlineData("HvNP", 123_456)]
 	[InlineData("2mCX", 32_129)]
 	[InlineData("tZnR", 45_923)]
-	[InlineData("bV", SqidsGenerator.MinValue)]
-	[InlineData("UwFNcZQ", SqidsGenerator.MaxValue)]
+	[InlineData("bV", SqidsEncoder.MinValue)]
+	[InlineData("UwFNcZQ", SqidsEncoder.MaxValue)]
 	// todo: a few [InlineData]s that are not also in the encoding test?
 	public void Decode_SingleNumberId_ReturnsRightNumber(string id, int expected)
 	{
-		var decoded = _generator.Decode(id);
+		var decoded = _encoder.Decode(id);
 		decoded.Should().BeEquivalentTo(new[] { expected });
 	}
 
@@ -85,7 +85,7 @@ public class DefaultTests
 	// todo: a few [InlineData]s that are not also in the encoding test?
 	public void Decode_MultipleNumberId_ReturnsRightNumber(string id, int[] expected)
 	{
-		var decoded = _generator.Decode(id);
+		var decoded = _encoder.Decode(id);
 		decoded.Should().BeEquivalentTo(expected);
 	}
 
@@ -95,7 +95,7 @@ public class DefaultTests
 	[InlineData(" ")]
 	public void Decode_NullOrWhitespaceInput_ReturnsEmptyArray(string? id)
 	{
-		var decoded = _generator.Decode(id);
+		var decoded = _encoder.Decode(id);
 		decoded.Should().BeEmpty();
 	}
 

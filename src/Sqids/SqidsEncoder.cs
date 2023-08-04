@@ -1,40 +1,39 @@
 ﻿namespace Sqids;
 
-// TODO: the suffix `Encoder` may be more accurate
 /// <summary>
-/// Initializes a new instance of <see cref="SqidsGenerator" /> with the default options.
+/// The Sqids encoder/decoder.
 /// </summary>
-public class SqidsGenerator
+public class SqidsEncoder
 {
 	private const int _minAlphabetLength = 5;
 	private readonly SqidsOptions _options;
 
 	/// <summary>
-	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsGenerator" />.
+	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
 	/// It's always zero across all ports of Sqids.
 	/// </summary>
 	public const int MinValue = 0;
 
 	/// <summary>
-	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsGenerator" />.
+	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
 	/// It's equal to `int.MaxValue`.
 	/// </summary>
 	public const int MaxValue = int.MaxValue;
 
 	/// <summary>
-	/// Initializes a new instance of <see cref="SqidsGenerator" /> with the default options.
+	/// Initializes a new instance of <see cref="SqidsEncoder" /> with the default options.
 	/// </summary>
-	public SqidsGenerator() : this(new()) { }
+	public SqidsEncoder() : this(new()) { }
 
 	/// <summary>
-	/// Initializes a new instance of <see cref="SqidsGenerator" /> with custom options.
+	/// Initializes a new instance of <see cref="SqidsEncoder" /> with custom options.
 	/// </summary>
 	/// <param name="options">
 	/// The custom options.
 	/// All properties of <see cref="SqidsOptions" /> are optional and will fall back to their
 	/// defaults unless explicitly set.
 	/// </param>
-	public SqidsGenerator(SqidsOptions options)
+	public SqidsEncoder(SqidsOptions options)
 	{
 		if (options.Alphabet.Length < _minAlphabetLength)
 			throw new ArgumentException("The alphabet must contain at least 5 characters.");
