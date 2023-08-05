@@ -42,7 +42,7 @@ public class SqidsEncoder
 		if (options.Alphabet.Distinct().Count() != options.Alphabet.Length)
 			throw new ArgumentException("The alphabet must not contain duplicate characters.");
 
-		if (options.MinLength < MinValue || options.MinLength > options.Alphabet.Length) // TODO: Why should `MinLength` not be greater than the length of the alphabet? The letter can be repeated in the generated IDs.
+		if (options.MinLength < MinValue || options.MinLength > options.Alphabet.Length)
 			throw new ArgumentException($"The minimum length must be between {MinValue} and {options.Alphabet.Length}.");
 
 		// NOTE: Cleanup the blocklist:
@@ -93,9 +93,6 @@ public class SqidsEncoder
 	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
 	{
 		if (id.IsEmpty)
-			return Array.Empty<int>();
-
-		if (id.Length < _options.MinLength) // TODO: This wasn't in the reference implementation — but it makes sense to me?
 			return Array.Empty<int>();
 
 		foreach (char c in id)
@@ -241,13 +238,14 @@ public class SqidsEncoder
 				continue;
 
 			if ((id.Length <= 3 || word.Length <= 3) &&
-			    id.Equals(word, StringComparison.OrdinalIgnoreCase))
+				id.Equals(word, StringComparison.OrdinalIgnoreCase))
 				return true;
 
 			if (word.Any(char.IsDigit) &&
 				(id.StartsWith(word, StringComparison.OrdinalIgnoreCase) ||
 				 id.EndsWith(word, StringComparison.OrdinalIgnoreCase)))
 				return true;
+
 			if (id.Contains(word, StringComparison.OrdinalIgnoreCase))
 				return true;
 		}

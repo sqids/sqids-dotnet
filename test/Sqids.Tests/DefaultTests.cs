@@ -2,8 +2,6 @@ namespace Sqids.Tests;
 
 public class DefaultTests
 {
-	// todo: with custom alphabet
-	// todo: with custom min length
 	private readonly SqidsEncoder _encoder = new(); // todo: here or in the methods?
 
 	[Theory]

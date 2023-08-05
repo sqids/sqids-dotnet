@@ -78,21 +78,4 @@ public class MinLengthTests
 		var decoded = encoder.Decode(id);
 		decoded.Should().BeEquivalentTo(expected);
 	}
-
-	[Theory]
-	[InlineData(5, "SurC")]
-	[InlineData(10, "4gMAwl7dM")]
-	[InlineData(23, "tjMfYDh9xIqbXnswW8")]
-	public void Decode_BelowMinLength_ReturnsEmptyArray(
-		int minLength,
-		string id
-	)
-	{
-		var encoder = new SqidsEncoder(new()
-		{
-			MinLength = minLength,
-		});
-		var decoded = encoder.Decode(id);
-		decoded.Should().BeEmpty();
-	}
 }
