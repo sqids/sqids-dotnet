@@ -4,6 +4,8 @@ public class DefaultTests
 {
 	private readonly SqidsEncoder _encoder = new(); // todo: here or in the methods?
 
+	// todo: a thread-safety test a la Hashids.net — https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/test/Hashids.net.test/GeneralTests.cs#L13-L27
+
 	[Theory]
 	[InlineData(1, "U9")]
 	[InlineData(2, "g8")]

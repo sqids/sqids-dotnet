@@ -3,11 +3,14 @@
 /// <summary>
 /// The Sqids encoder/decoder.
 /// </summary>
-public class SqidsEncoder
+public sealed class SqidsEncoder
 {
 	private const int MinAlphabetLength = 5;
+	private const int MaxStackallocSize = 512; // TODO: Is this an appropriate number? Hashids.net uses this: https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/src/Hashids.net/Hashids.cs#L17
 
-	private readonly SqidsOptions _options;
+	private readonly char[] _alphabet;
+	private readonly int _minLength;
+	private readonly string[] _blockList;
 
 	/// <summary>
 	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
@@ -45,6 +48,8 @@ public class SqidsEncoder
 		if (options.MinLength < MinValue || options.MinLength > options.Alphabet.Length)
 			throw new ArgumentException($"The minimum length must be between {MinValue} and {options.Alphabet.Length}.");
 
+		_minLength = options.MinLength;
+
 		// NOTE: Cleanup the blocklist:
 		options.BlockList = new HashSet<string>(
 			options.BlockList,
@@ -54,20 +59,36 @@ public class SqidsEncoder
 			w.Length < 3 || // NOTE: Removes words that are less than 3 characters long
 			w.Any(c => !options.Alphabet.Contains(c)) // NOTE: Removes words that contain characters not found in the alphabet
 		);
+		_blockList = options.BlockList.ToArray(); // NOTE: An array is faster to iterate over compared to a HashSet, so we construct and array here.
 
-		Span<char> shuffledAlphabet = stackalloc char[options.Alphabet.Length];
+		Span<char> shuffledAlphabet = options.Alphabet.Length > MaxStackallocSize
+			? new char[options.Alphabet.Length]
+			: stackalloc char[options.Alphabet.Length];
 		options.Alphabet.AsSpan().CopyTo(shuffledAlphabet);
 		ConsistentShuffle(shuffledAlphabet);
-		options.Alphabet = shuffledAlphabet.ToString();
-
-		_options = options;
+		_alphabet = shuffledAlphabet.ToArray();
 	}
 
 	/// <summary>
-	/// Encodes one or more integers into a Sqids ID.
+	/// Encodes a single number into a Sqids ID.
 	/// </summary>
-	/// <param name="numbers">The array of integers to encode.</param>
-	/// <returns>A string containing the encoded ID(s), or an empty string if the array passed is empty.</returns>
+	/// <param name="number">The number to encode.</param>
+	/// <returns>A string containing the encoded ID.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
+	public string Encode(int number)
+	{
+		if (number < MinValue || number > MaxValue)
+			throw new ArgumentOutOfRangeException($"Encoding supports numbers between '{MinValue}' and '{MaxValue}'.");
+
+		return Encode(stackalloc[] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
+	}
+
+	/// <summary>
+	/// Encodes multiple numbers into a Sqids ID.
+	/// </summary>
+	/// <param name="numbers">The numbers to encode.</param>
+	/// <returns>A string containing the encoded IDs, or an empty string if the array passed is empty.</returns>
 	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
 	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
 	public string Encode(params int[] numbers)
@@ -78,7 +99,112 @@ public class SqidsEncoder
 		if (numbers.Any(n => n < MinValue || n > MaxValue))
 			throw new ArgumentOutOfRangeException($"Encoding supports numbers between '{MinValue}' and '{MaxValue}'.");
 
-		return EncodeNumbers(numbers);
+		return Encode(numbers.AsSpan());
+	}
+
+	/// <summary>
+	/// Encodes a collection of numbers into a Sqids ID.
+	/// </summary>
+	/// <param name="numbers">The numbers to encode.</param>
+	/// <returns>A string containing the encoded IDs, or an empty string if the `IEnumerable` passed is empty.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
+	public string Encode(IEnumerable<int> numbers) =>
+		Encode(numbers.ToArray());
+
+	private string Encode(ReadOnlySpan<int> numbers, bool partitioned = false)
+	{
+		int offset = 0;
+		for (int i = 0; i < numbers.Length; i++)
+			offset += _alphabet[numbers[i] % _alphabet.Length] + i;
+		offset = (numbers.Length + offset) % _alphabet.Length;
+
+		Span<char> alphabetTemp = _alphabet.Length > MaxStackallocSize
+			? new char[_alphabet.Length]
+			: stackalloc char[_alphabet.Length];
+		var alphabetSpan = _alphabet.AsSpan();
+		alphabetSpan[offset..].CopyTo(alphabetTemp[..^offset]);
+		alphabetSpan[..offset].CopyTo(alphabetTemp[^offset..]);
+
+		char prefix = alphabetTemp[0];
+		char partition = alphabetTemp[1];
+		alphabetTemp = alphabetTemp[2..];
+
+		var builder = new StringBuilder(); // TODO: pool a la Hashids.net?
+		builder.Append(prefix);
+
+		for (int i = 0; i < numbers.Length; i++)
+		{
+			int number = numbers[i];
+
+			var alphabetWithoutSeparator = alphabetTemp[..^1];
+			var encodedNumber = ToId(number, alphabetWithoutSeparator);
+			builder.Append(encodedNumber);
+
+			if (i >= numbers.Length - 1) // NOTE: If the last one
+				continue;
+
+			char separator = alphabetTemp[^1]; // NOTE: Exclude the last character
+
+			builder.Append(
+				partitioned && i == 0
+					? partition
+					: separator
+			);
+
+			ConsistentShuffle(alphabetTemp);
+		}
+
+		string result = builder.ToString(); // TODO: Can't we get a span here as opposed to allocating a string?
+
+		if (result.Length < _minLength)
+		{
+			if (!partitioned)
+			{
+				Span<int> newNumbers = numbers.Length + 1 > MaxStackallocSize
+					? new int[numbers.Length + 1]
+					: stackalloc int[numbers.Length + 1];
+				newNumbers[0] = 0;
+				numbers.CopyTo(newNumbers[1..]);
+				result = Encode(newNumbers, partitioned: true);
+			}
+
+			if (result.Length < _minLength)
+			{
+				var leftToMeetMinLength = _minLength - result.Length;
+				var paddingFromAlphabet = alphabetTemp[..leftToMeetMinLength];
+				builder.Insert(1, paddingFromAlphabet);
+				result = builder.ToString();
+			}
+		}
+
+		if (IsBlockedId(result))
+		{
+			Span<int> newNumbers = numbers.Length > MaxStackallocSize
+				? new int[numbers.Length]
+				: stackalloc int[numbers.Length];
+			numbers.CopyTo(newNumbers);
+
+			if (partitioned)
+			{
+				if (numbers[0] + 1 > MaxValue)
+					throw new OverflowException("Ran out of range checking against the blocklist.");
+				else
+					newNumbers[0] += 1;
+			}
+			else
+			{
+				newNumbers = numbers.Length + 1 > MaxStackallocSize
+					? new int[numbers.Length + 1]
+					: stackalloc int[numbers.Length + 1];
+				newNumbers[0] = 0;
+				numbers.CopyTo(newNumbers[1..]);
+			}
+
+			result = Encode(newNumbers, partitioned: true);
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -90,23 +216,25 @@ public class SqidsEncoder
 	/// input string is null, empty, contains fewer characters than the configured minimum length,
 	/// or includes characters not found in the alphabet.
 	/// </returns>
-	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
+	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id) // TODO: The return type of this method should be give-able to `Encode`
 	{
 		if (id.IsEmpty)
 			return Array.Empty<int>();
 
 		foreach (char c in id)
-			if (!_options.Alphabet.Contains(c))
+			if (!_alphabet.Contains(c))
 				return Array.Empty<int>();
 
-		var alphabet = _options.Alphabet.AsSpan();
+		var alphabetSpan = _alphabet.AsSpan();
 
 		char prefix = id[0];
-		int offset = alphabet.IndexOf(prefix);
+		int offset = alphabetSpan.IndexOf(prefix);
 
-		Span<char> alphabetTemp = stackalloc char[_options.Alphabet.Length]; // TODO: check stack max size against alphabet.Length a la Hashids?
-		alphabet[offset..].CopyTo(alphabetTemp[..^offset]);
-		alphabet[..offset].CopyTo(alphabetTemp[^offset..]);
+		Span<char> alphabetTemp = _alphabet.Length > MaxStackallocSize
+			? new char[_alphabet.Length]
+			: stackalloc char[_alphabet.Length];
+		alphabetSpan[offset..].CopyTo(alphabetTemp[..^offset]);
+		alphabetSpan[..offset].CopyTo(alphabetTemp[^offset..]);
 
 		char partition = alphabetTemp[1];
 		alphabetTemp = alphabetTemp[2..];
@@ -140,99 +268,12 @@ public class SqidsEncoder
 				ConsistentShuffle(alphabetTemp);
 		}
 
-		return result;
-	}
-
-	// Private Helpers:
-	private string EncodeNumbers(int[] numbers, bool partitioned = false)
-	{
-		var alphabet = _options.Alphabet.AsSpan();
-
-		int offset = 0;
-		for (int i = 0; i < numbers.Length; i++)
-			offset += alphabet[numbers[i] % alphabet.Length] + i;
-		offset = (numbers.Length + offset) % alphabet.Length;
-
-		Span<char> alphabetTemp = stackalloc char[alphabet.Length]; // TODO: check stack max size against alphabet.Length a la Hashids?
-		alphabet[offset..].CopyTo(alphabetTemp[..^offset]);
-		alphabet[..offset].CopyTo(alphabetTemp[^offset..]);
-
-		char prefix = alphabetTemp[0];
-		char partition = alphabetTemp[1];
-		alphabetTemp = alphabetTemp[2..];
-
-		var builder = new StringBuilder(); // TODO: pool a la Hashids.net?
-		builder.Append(prefix);
-
-		for (int i = 0; i < numbers.Length; i++)
-		{
-			int number = numbers[i];
-
-			var alphabetWithoutSeparator = alphabetTemp[..^1];
-			var encodedNumber = ToId(number, alphabetWithoutSeparator);
-			builder.Append(encodedNumber);
-
-			if (i >= numbers.Length - 1) // NOTE: If the last one
-				continue;
-
-			char separator = alphabetTemp[^1]; // NOTE: Exclude the last character
-
-			builder.Append(
-				partitioned && i == 0
-					? partition
-					: separator
-			);
-
-			ConsistentShuffle(alphabetTemp);
-		}
-
-		string result = builder.ToString(); // TODO: preferably don't `ToString()` this early
-
-		if (result.Length < _options.MinLength)
-		{
-			if (!partitioned)
-			{
-				var newNumbers = new int[numbers.Length + 1];
-				newNumbers[0] = 0;
-				numbers.CopyTo(newNumbers, 1);
-				result = EncodeNumbers(newNumbers, partitioned: true);
-			}
-
-			if (result.Length < _options.MinLength)
-			{
-				var leftToMeetMinLength = _options.MinLength - result.Length;
-				var paddingFromAlphabet = alphabetTemp[..leftToMeetMinLength];
-				builder.Insert(1, paddingFromAlphabet);
-				result = builder.ToString();
-			}
-		}
-
-		if (IsBlockedId(result))
-		{
-			int[] newNumbers = numbers;
-			if (partitioned)
-			{
-				if (numbers[0] + 1 > MaxValue)
-					throw new OverflowException("Ran out of range checking against the blocklist.");
-				else
-					newNumbers[0] += 1;
-			}
-			else
-			{
-				newNumbers = new int[numbers.Length + 1]; // TODO: heap allocation
-				newNumbers[0] = 0;
-				numbers.CopyTo(newNumbers, 1);
-			}
-
-			result = EncodeNumbers(newNumbers, true);
-		}
-
-		return result;
+		return result; // NOTE: We don't do `.ToArray()` here to avoid creating a new array; we just return the list directly as an `IReadOnlyList`.
 	}
 
 	private bool IsBlockedId(ReadOnlySpan<char> id)
 	{
-		foreach (string word in _options.BlockList)
+		foreach (string word in _blockList)
 		{
 			if (word.Length > id.Length)
 				continue;
@@ -253,16 +294,13 @@ public class SqidsEncoder
 		return false;
 	}
 
-	/// <summary>
-	/// Shuffles a span of characters in place.
-	/// The shuffle produces consistent results.
-	/// </summary>
-	private static void ConsistentShuffle(Span<char> alphabet)
+	// NOTE: Shuffles a span of characters in place. The shuffle produces consistent results.
+	private static void ConsistentShuffle(Span<char> chars)
 	{
-		for (int i = 0, j = alphabet.Length - 1; j > 0; i++, j--)
+		for (int i = 0, j = chars.Length - 1; j > 0; i++, j--)
 		{
-			int r = (i * j + alphabet[i] + alphabet[j]) % alphabet.Length;
-			(alphabet[i], alphabet[r]) = (alphabet[r], alphabet[i]);
+			int r = (i * j + chars[i] + chars[j]) % chars.Length;
+			(chars[i], chars[r]) = (chars[r], chars[i]);
 		}
 	}
 

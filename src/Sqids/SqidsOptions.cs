@@ -5,7 +5,7 @@ namespace Sqids;
 /// Must contain at least 5 characters.
 /// The default is lowercase letters, uppercase letters, and digits.
 /// </summary>
-public class SqidsOptions
+public sealed class SqidsOptions
 {
 	/// <summary>
 	/// Custom alphabet that will be used for the IDs.
