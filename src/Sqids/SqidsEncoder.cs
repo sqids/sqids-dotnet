@@ -6,7 +6,7 @@
 public sealed class SqidsEncoder
 {
 	private const int MinAlphabetLength = 5;
-	private const int MaxStackallocSize = 512; // TODO: Is this an appropriate number? Hashids.net uses this: https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/src/Hashids.net/Hashids.cs#L17
+	private const int MaxStackallocSize = 256; // NOTE: In bytes — this value is essentially arbitrary, the Microsoft docs is using 1024 but recommends being more conservative when choosing the value (https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/stackalloc), Hashids apparently uses 512 (https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/src/Hashids.net/Hashids.cs#L17), and this article (https://vcsjones.dev/stackalloc/) uses 256. I've tried to be pretty cautious and gone with a low value.
 
 	private readonly char[] _alphabet;
 	private readonly int _minLength;
@@ -61,7 +61,7 @@ public sealed class SqidsEncoder
 		);
 		_blockList = options.BlockList.ToArray(); // NOTE: An array is faster to iterate over compared to a HashSet, so we construct and array here.
 
-		Span<char> shuffledAlphabet = options.Alphabet.Length > MaxStackallocSize
+		Span<char> shuffledAlphabet = options.Alphabet.Length * sizeof(char) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
 			? new char[options.Alphabet.Length]
 			: stackalloc char[options.Alphabet.Length];
 		options.Alphabet.AsSpan().CopyTo(shuffledAlphabet);
@@ -112,6 +112,7 @@ public sealed class SqidsEncoder
 	public string Encode(IEnumerable<int> numbers) =>
 		Encode(numbers.ToArray());
 
+	// TODO: Consider using `ArrayPool` if possible
 	private string Encode(ReadOnlySpan<int> numbers, bool partitioned = false)
 	{
 		int offset = 0;
@@ -119,7 +120,7 @@ public sealed class SqidsEncoder
 			offset += _alphabet[numbers[i] % _alphabet.Length] + i;
 		offset = (numbers.Length + offset) % _alphabet.Length;
 
-		Span<char> alphabetTemp = _alphabet.Length > MaxStackallocSize
+		Span<char> alphabetTemp = _alphabet.Length * sizeof(char) > MaxStackallocSize
 			? new char[_alphabet.Length]
 			: stackalloc char[_alphabet.Length];
 		var alphabetSpan = _alphabet.AsSpan();
@@ -161,7 +162,7 @@ public sealed class SqidsEncoder
 		{
 			if (!partitioned)
 			{
-				Span<int> newNumbers = numbers.Length + 1 > MaxStackallocSize
+				Span<int> newNumbers = (numbers.Length + 1) * sizeof(int) > MaxStackallocSize
 					? new int[numbers.Length + 1]
 					: stackalloc int[numbers.Length + 1];
 				newNumbers[0] = 0;
@@ -180,7 +181,7 @@ public sealed class SqidsEncoder
 
 		if (IsBlockedId(result))
 		{
-			Span<int> newNumbers = numbers.Length > MaxStackallocSize
+			Span<int> newNumbers = numbers.Length * sizeof(int) > MaxStackallocSize
 				? new int[numbers.Length]
 				: stackalloc int[numbers.Length];
 			numbers.CopyTo(newNumbers);
@@ -194,7 +195,7 @@ public sealed class SqidsEncoder
 			}
 			else
 			{
-				newNumbers = numbers.Length + 1 > MaxStackallocSize
+				newNumbers = (numbers.Length + 1) * sizeof(int) > MaxStackallocSize
 					? new int[numbers.Length + 1]
 					: stackalloc int[numbers.Length + 1];
 				newNumbers[0] = 0;
@@ -216,7 +217,7 @@ public sealed class SqidsEncoder
 	/// input string is null, empty, contains fewer characters than the configured minimum length,
 	/// or includes characters not found in the alphabet.
 	/// </returns>
-	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id) // TODO: The return type of this method should be give-able to `Encode`
+	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
 	{
 		if (id.IsEmpty)
 			return Array.Empty<int>();
@@ -230,7 +231,7 @@ public sealed class SqidsEncoder
 		char prefix = id[0];
 		int offset = alphabetSpan.IndexOf(prefix);
 
-		Span<char> alphabetTemp = _alphabet.Length > MaxStackallocSize
+		Span<char> alphabetTemp = _alphabet.Length * sizeof(char) > MaxStackallocSize
 			? new char[_alphabet.Length]
 			: stackalloc char[_alphabet.Length];
 		alphabetSpan[offset..].CopyTo(alphabetTemp[..^offset]);
