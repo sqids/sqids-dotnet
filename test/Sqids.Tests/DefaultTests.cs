@@ -34,18 +34,33 @@ public class DefaultTests
 	[InlineData(new[] { 23, 129, 1892, 83, 9, 0, 12, 38, 9 }, "H2VQqalFJ6kwtUkUK242L")]
 	public void Encode_MultipleNumbers_ReturnsRightId(int[] numbers, string expected)
 	{
-		var encoded = _encoder.Encode(numbers);
-		encoded.Should().Be(expected);
+		var encoding1 = _encoder.Encode(numbers); // NOTE: The `params int[]` overload
+		encoding1.Should().Be(expected);
+
+		var encoding2 = _encoder.Encode(numbers.ToList()); // NOTE: The `IEnumerable<int>` overload
+		encoding2.Should().Be(expected);
 	}
 
 	[Theory]
 	[InlineData(-1)]
 	[InlineData(-145)]
 	[InlineData(int.MinValue)]
-	public void Encode_NegativeNumber_Throws(int input)
+	public void Encode_SingleNegativeNumber_Throws(int number)
 	{
-		var encoding = () => _encoder.Encode(input);
+		var encoding = () => _encoder.Encode(number);
 		encoding.Should().Throw<ArgumentOutOfRangeException>();
+	}
+
+	[Theory]
+	[InlineData(new[] { 123, 50, -1, 10 })]
+	[InlineData(new[] { int.MinValue, 1, 2 })]
+	public void Encode_NegativeNumberAmongMultiple_Throws(int[] numbers)
+	{
+		var encoding1 = () => _encoder.Encode(numbers); // NOTE: The `params int[]` overload
+		encoding1.Should().Throw<ArgumentOutOfRangeException>();
+
+		var encoding2 = () => _encoder.Encode(numbers.ToList()); // NOTE: The `IEnumerable<int>` overload
+		encoding2.Should().Throw<ArgumentOutOfRangeException>();
 	}
 
 	[Fact]

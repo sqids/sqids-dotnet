@@ -91,7 +91,7 @@ public class BlockListTests
 	}
 
 	[Fact]
-	public void Encode_WithTooShortBlockListWords_RemovesFromBlockList()
+	public void Encode_WithTooShortBlockListWords_DiscardsBlockList()
 	{
 		var encoder = new SqidsEncoder(new()
 		{
