@@ -2,113 +2,100 @@ namespace Sqids.Tests;
 
 public class BlockListTests
 {
-	[Theory]
-	[InlineData(200044, "sexy")] // NOTE: Without the blocklist, the number `200044` would yield `sexy` when encoded.
-	public void Encode_WithDefaultBlockList_BlocksDefaultBlockListWords(
-		int number,
-		string defaultBlockedEncoded
-	)
+	[Fact]
+	public void DefaultBlockListIfNoneSet()
 	{
-		var encoder = new SqidsEncoder();
-		var encoded = encoder.Encode(number);
-		encoded.Should().NotBe(defaultBlockedEncoded);
+		var sqids = new SqidsEncoder();
+
+		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).Should().Be("d171vI");
 	}
 
-	[Theory]
-	[InlineData("sexy", 200044)]
-	public void Decode_WithDefaultBlockList_StillDecodesBlockListWords(
-		string id,
-		int expected
-	)
+	[Fact]
+	public void NoBlockListIfReset()
 	{
-		var encoder = new SqidsEncoder();
-		var encoded = encoder.Decode(id);
-		encoded.Should().BeEquivalentTo(new[] { expected });
-	}
-
-	[Theory]
-	[InlineData(200044, "sexy")]
-	public void Encode_WithEmptyBlockList_DoesNotBlockAnything(
-		int number,
-		string expected
-	)
-	{
-		var encoder = new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
 			BlockList = new(),
 		});
-		var encoded = encoder.Encode(number);
-		encoded.Should().Be(expected);
+
+		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).Should().Be("sexy");
 	}
 
-	[Theory]
-	[InlineData(2000, "srV")]
-	public void Encode_WithCustomBlockList_BlocksCustomBlockListWords(
-		int number,
-		string normalEncoded
-	)
+	[Fact]
+	public void OnlyCustomBlockListIfSet()
 	{
-		var encoder = new SqidsEncoder(new()
-		{
-			BlockList = new() { normalEncoded },
-		});
-		var encoded = encoder.Encode(number);
-		encoded.Should().NotBe(normalEncoded);
-	}
-
-	[Theory]
-	[InlineData(new[] { "foo" }, 200044, "sexy")]
-	public void Encode_WithCustomBlockList_DoesNotBlockDefaultBlockListWords(
-		string[] blocklist,
-		int number,
-		string byDefaultBlockedEncoded
-	)
-	{
-		var encoder = new SqidsEncoder(new()
-		{
-			BlockList = new(blocklist),
-		});
-		var encoded = encoder.Encode(number);
-		encoded.Should().Be(byDefaultBlockedEncoded);
-	}
-
-	[Theory]
-	[InlineData(982938132, "IrHOxXX")]
-	public void Encode_WithCustomBlockList_BlocksSubstring(
-		int number,
-		string normalEncoded
-	)
-	{
-		var encoder = new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
 			BlockList = new()
 			{
-				normalEncoded[3..] // NOTE: First four characters
+				"AvTg" // Originally encoded [100000]
 			},
 		});
-		var encoded = encoder.Encode(number);
-		encoded.Should().NotBe(normalEncoded);
+
+		// Make sure the default blocklist isn't used
+		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).Should().Be("sexy");
+
+		// Make sure the passed blocklist IS used:
+		sqids.Decode("AvTg").Should().BeEquivalentTo(new[] { 100000 });
+		sqids.Encode(100000).Should().Be("7T1X8k");
+		sqids.Decode("7T1X8k").Should().BeEquivalentTo(new[] { 100000 });
 	}
 
 	[Fact]
-	public void Encode_WithTooShortBlockListWords_DiscardsBlockList()
+	public void CustomBlockList()
 	{
-		var encoder = new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
-			BlockList = new() { "U9" } // NOTE: `U9` is the normal encoding of `1`, and it's less than 3 characters, so its inclusion in the blocklist shouldn't not actually make a difference.
+			BlockList = new()
+			{
+				"8QRLaD", // normal result of 1st encoding, let's block that word on purpose
+				"7T1cd0dL", // result of 2nd encoding
+				"UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
+				"imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
+				"LfUQ", // result of 4th encoding is `LfUQh4HN`, let's block the prefix
+			},
 		});
-		var encoded = encoder.Encode(1);
-		encoded.Should().Be("U9");
+
+		sqids.Encode(1, 2, 3).Should().Be("TM0x1Mxz");
+		sqids.Decode("TM0x1Mxz").Should().BeEquivalentTo(new[] { 1, 2, 3 });
 	}
 
 	[Fact]
-	public void Encode_WithCustomBlockList_IgnoresCasing()
+	public void DecodingBlockedWordsShouldWork()
 	{
-		var encoder = new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
-			BlockList = new() { "uAVP" } // `Uavp` is the normal encoding of `98765` — we block a different casing of it, and we expect it to be blocked, since the blocklist should work case-insensitively.
+			BlockList = new()
+			{
+				"8QRLaD",
+				"7T1cd0dL",
+				"RA8UeIe7",
+				"WM3Limhw",
+				"LfUQh4HN",
+			},
 		});
-		var encoded = encoder.Encode(98765);
-		encoded.Should().NotBe("Uavp");
+
+		sqids.Decode("8QRLaD").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("7T1cd0dL").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("RA8UeIe7").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("WM3Limhw").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("LfUQh4HN").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+	}
+
+	[Fact]
+	public void MatchAgainstShortBlockListWord()
+	{
+		var sqids = new SqidsEncoder(new()
+		{
+			BlockList = new()
+			{
+				"pPQ",
+			},
+		});
+
+		sqids.Decode(sqids.Encode(1000)).Should().BeEquivalentTo(new[] { 1000 });
 	}
 }

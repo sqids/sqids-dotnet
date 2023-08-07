@@ -2,80 +2,92 @@ namespace Sqids.Tests;
 
 public class MinLengthTests
 {
-	[Theory]
-	[InlineData(-1)]
-	[InlineData(int.MinValue)]
-	public void Constructor_MinLengthTooSmall_Throws(int minLength)
+	[Fact]
+	public void Simple()
 	{
-		var act = () => new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
-			MinLength = minLength,
+			MinLength = new SqidsOptions().Alphabet.Length, // Gets the default alphabet
 		});
-		act.Should().Throw<ArgumentException>();
+
+		var numbers = new[] { 1, 2, 3 };
+		var id = "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtnRpgizhjU42qT1cd0dL";
+
+		sqids.Encode(numbers).Should().Be(id);
+		sqids.Decode(id).Should().BeEquivalentTo(numbers);
 	}
 
-	[Theory]
-	[InlineData("abcde")]
-	[InlineData("0123456789")]
-	public void Constructor_MinLengthBiggerThanAlphabetLength_Throws(string alphabet)
+	[Fact]
+	public void IncrementalNumbers()
 	{
-		var act = () => new SqidsEncoder(new()
+		var sqids = new SqidsEncoder(new()
 		{
-			Alphabet = alphabet,
-			MinLength = alphabet.Length + 1,
+			MinLength = new SqidsOptions().Alphabet.Length, // Gets the default alphabet
 		});
-		act.Should().Throw<ArgumentException>();
+
+		var idsAndNumbers = new Dictionary<string, int[]>()
+		{
+			["jf26PLNeO5WbJDUV7FmMtlGXps3CoqkHnZ8cYd19yIiTAQuvKSExzhrRghBlwf"] = new[] { 0, 0 },
+			["vQLUq7zWXC6k9cNOtgJ2ZK8rbxuipBFAS10yTdYeRa3ojHwGnmMV4PDhESI2jL"] = new[] { 0, 1 },
+			["YhcpVK3COXbifmnZoLuxWgBQwtjsSaDGAdr0ReTHM16yI9vU8JNzlFq5Eu2oPp"] = new[] { 0, 2 },
+			["OTkn9daFgDZX6LbmfxI83RSKetJu0APihlsrYoz5pvQw7GyWHEUcN2jBqd4kJ9"] = new[] { 0, 3 },
+			["h2cV5eLNYj1x4ToZpfM90UlgHBOKikQFvnW36AC8zrmuJ7XdRytIGPawqYEbBe"] = new[] { 0, 4 },
+			["7Mf0HeUNkpsZOTvmcj836P9EWKaACBubInFJtwXR2DSzgYGhQV5i4lLxoT1qdU"] = new[] { 0, 5 },
+			["APVSD1ZIY4WGBK75xktMfTev8qsCJw6oyH2j3OnLcXRlhziUmpbuNEar05QCsI"] = new[] { 0, 6 },
+			["P0LUhnlT76rsWSofOeyRGQZv1cC5qu3dtaJYNEXwk8Vpx92bKiHIz4MgmiDOF7"] = new[] { 0, 7 },
+			["xAhypZMXYIGCL4uW0te6lsFHaPc3SiD1TBgw5O7bvodzjqUn89JQRfk2Nvm4JI"] = new[] { 0, 8 },
+			["94dRPIZ6irlXWvTbKywFuAhBoECQOVMjDJp53s2xeqaSzHY8nc17tmkLGwfGNl"] = new[] { 0, 9 },
+		};
+
+		foreach (var (id, numbers) in idsAndNumbers)
+		{
+			sqids.Encode(numbers).Should().Be(id);
+			sqids.Decode(id).Should().BeEquivalentTo(numbers);
+		}
 	}
 
-	[Theory]
-	[InlineData("abcde")]
-	[InlineData("0123456789")]
-	public void Constructor_ValidMinLength_DoesNotThrow(string alphabet)
+	[Fact]
+	public void MinLengths()
 	{
-		var act = () => new SqidsEncoder(new()
+		foreach (var minLength in new[] { 0, 1, 5, 10, new SqidsOptions().Alphabet.Length })
 		{
-			Alphabet = alphabet,
-			MinLength = alphabet.Length / 2,
-		});
-		act.Should().NotThrow<ArgumentException>();
+			var numbersList = new[]
+			{
+				new[] { SqidsEncoder.MinValue },
+				new[] { 0, 0, 0, 0, 0 },
+				new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+				new[] { 100, 200, 300 },
+				new[] { 1_000, 2_000, 3_000 },
+				new[] { 1_000_000 },
+				new[] { SqidsEncoder.MaxValue }
+			};
+			foreach (var numbers in numbersList)
+			{
+				var sqids = new SqidsEncoder(new()
+				{
+					MinLength = minLength
+				});
+
+				var id = sqids.Encode(numbers);
+				id.Length.Should().BeGreaterThanOrEqualTo(minLength);
+				sqids.Decode(id).Should().BeEquivalentTo(numbers);
+			}
+		}
 	}
 
-	[Theory]
-	[InlineData(5, new[] { 0 }, "SurCu")]
-	[InlineData(7, new[] { 1 }, "nhERZME")]
-	[InlineData(10, new[] { 100 }, "4gMAwl7dM0")]
-	[InlineData(23, new[] { 250 }, "tjMfYDh9xIqbXnswW8TJaDw")]
-	[InlineData(50, new[] { 1, 2, 3 }, "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtT1cd0dL")]
-	public void Encode_WithCustomMinLength_ReturnsRightId(
-		int minLength,
-		int[] numbers,
-		string expected
-	)
+	[Fact]
+	public void MinLengthOutOfRange()
 	{
-		var encoder = new SqidsEncoder(new()
+		var a1 = () => new SqidsEncoder(new()
 		{
-			MinLength = minLength,
+			MinLength = -1,
 		});
-		var encoded = encoder.Encode(numbers);
-		encoded.Should().Be(expected);
-	}
+		a1.Should().Throw<ArgumentException>();
 
-	[Theory]
-	[InlineData(5, "SurCu", new[] { SqidsEncoder.MinValue })]
-	[InlineData(7, "nhERZME", new[] { 1 })]
-	[InlineData(10, "4gMAwl7dM0", new[] { 100 })]
-	[InlineData(23, "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtT1cd0dL", new[] { 1, 2, 3 })]
-	public void Decode_WithCustomMinLength_ReturnsRightNumber(
-		int minLength,
-		string id,
-		int[] expected
-	)
-	{
-		var encoder = new SqidsEncoder(new()
+		var a2 = () => new SqidsEncoder(new()
 		{
-			MinLength = minLength,
+			MinLength = new SqidsOptions().Alphabet.Length + 1,
 		});
-		var decoded = encoder.Decode(id);
-		decoded.Should().BeEquivalentTo(expected);
+		a2.Should().Throw<ArgumentException>();
 	}
 }

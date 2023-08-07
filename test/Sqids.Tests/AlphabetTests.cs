@@ -2,85 +2,64 @@ namespace Sqids.Tests;
 
 public class AlphabetTests
 {
-	[Theory]
-	// NOTE: Too short
-	[InlineData("")]
-	[InlineData("a")]
-	[InlineData("1234")]
-	// NOTE: Repeated characters
-	[InlineData("aabcdefg")]
-	[InlineData("01234567789")]
-	public void Constructor_InvalidAlphabet_Throws(string alphabet)
+	[Fact]
+	public void Simple()
+	{
+		var sqids = new SqidsEncoder(new()
+		{
+			Alphabet = "0123456789abcdef",
+		});
+
+		var numbers = new[] { 1, 2, 3 };
+		var id = "4d9fd2";
+
+		sqids.Encode(numbers).Should().Be(id);
+		sqids.Decode(id).Should().BeEquivalentTo(numbers);
+	}
+
+	[Fact]
+	public void ShortAlphabet()
+	{
+		var sqids = new SqidsEncoder(new()
+		{
+			Alphabet = "abcde",
+		});
+
+		var numbers = new[] { 1, 2, 3 };
+
+		sqids.Decode(sqids.Encode(numbers)).Should().BeEquivalentTo(numbers);
+	}
+
+	[Fact]
+	public void LongAlphabet()
+	{
+		var sqids = new SqidsEncoder(new()
+		{
+			Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~",
+		});
+
+		var numbers = new[] { 1, 2, 3 };
+
+		sqids.Decode(sqids.Encode(numbers)).Should().BeEquivalentTo(numbers);
+	}
+
+	[Fact]
+	public void RepeatedCharactersInAlphabet()
 	{
 		var act = () => new SqidsEncoder(new()
 		{
-			Alphabet = alphabet,
+			Alphabet = "aabcdefg",
 		});
 		act.Should().Throw<ArgumentException>();
 	}
 
-	[Theory]
-	[InlineData("abcedfghijklmnop")]
-	[InlineData("0123456789")]
-	[InlineData("0123456789abcedfghijklmnop!@#$%^&*()")]
-	public void Constructor_ValidAlphabet_DoesNotThrow(string alphabet)
+	[Fact]
+	public void TooShortOfAnAlphabet()
 	{
 		var act = () => new SqidsEncoder(new()
 		{
-			Alphabet = alphabet,
+			Alphabet = "abcd",
 		});
-		act.Should().NotThrow();
-	}
-
-	[Theory]
-	[InlineData("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:\'\" /?.>,<`~", 420, "xP7")]
-	[InlineData("ABCDEFGHIJKLMNOP", 120, "EHB")]
-	[InlineData("abcde", 942, "dbbbcbcbbbc")]
-	public void Encode_WithCustomAlphabet_ReturnsRightId(
-		string alphabet,
-		int number,
-		string expected
-	)
-	{
-		var encoder = new SqidsEncoder(new()
-		{
-			Alphabet = alphabet,
-		});
-		var encoded = encoder.Encode(number);
-		encoded.Should().Be(expected); // todo: only check the characters?
-	}
-
-	[Theory]
-	[InlineData("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:\'\" /?.>,<`~", "xP7", 420)]
-	[InlineData("ABCDEFGHIJKLMNOP", "EHB", 120)]
-	[InlineData("abcde", "dbbbcbcbbbc", 942)]
-	public void Decode_WithCustomAlphabet_ReturnsRightId(
-		string alphabet,
-		string id,
-		int expected
-	)
-	{
-		var encoder = new SqidsEncoder(new()
-		{
-			Alphabet = alphabet,
-		});
-		var decoded = encoder.Decode(id);
-		decoded.Should().BeEquivalentTo(new[] { expected });
-	}
-
-	[Theory]
-	[InlineData("ABCDEFGHIJKLMNOP", "7dB")]
-	[InlineData("abcde", "98731232")]
-	public void Decode_InputWithCharactersNotInAlphabet_ReturnsRightId(
-		string alphabet,
-		string id
-	)
-	{
-		var encoder = new SqidsEncoder(new()
-		{
-			Alphabet = alphabet,
-		});
-		var decoded = encoder.Decode(id);
-		decoded.Should().BeEmpty();
+		act.Should().Throw<ArgumentException>();
 	}
 }
