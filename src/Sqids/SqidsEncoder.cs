@@ -256,7 +256,7 @@ public sealed class SqidsEncoder
 
 			var separatorIndex = id.IndexOf(separator);
 			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` to the left of the separator is the number that we ought to decode.
-			id = id[chunk.Length..].TrimStart(separator); // NOTE: The `id` for the next iteration would exclude the current `chunk` (and also any following comma, if there is one)
+			id = separatorIndex == -1 ? string.Empty : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id ` for the next iteration
 
 			if (chunk.IsEmpty)
 				continue;
