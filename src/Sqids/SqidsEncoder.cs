@@ -217,7 +217,7 @@ public sealed class SqidsEncoder
 	/// input string is null, empty, contains fewer characters than the configured minimum length,
 	/// or includes characters not found in the alphabet.
 	/// </returns>
-	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
+	public int[] Decode(ReadOnlySpan<char> id)
 	{
 		if (id.IsEmpty)
 			return Array.Empty<int>();
@@ -269,7 +269,7 @@ public sealed class SqidsEncoder
 				ConsistentShuffle(alphabetTemp);
 		}
 
-		return result; // NOTE: We don't do `.ToArray()` here to avoid creating a new array; we just return the list directly as an `IReadOnlyList`.
+		return result.ToArray(); // TODO: A way to return an array without creating a new array from the list like this?
 	}
 
 	private bool IsBlockedId(ReadOnlySpan<char> id)
