@@ -1,8 +1,33 @@
-# [Sqids .NET](https://sqids.org/dotnet)
+<p align="center">
+	<a href="https://sqids.org/dotnet">
+		<img alt="Logo" src="logo.svg" />
+	</a>
+</p>
+<h1 align="center">Sqids .NET</h1>
+<p align="center">
+	<a href="https://www.nuget.org/packages/Sqids">
+		<img alt="Nuget" src="https://img.shields.io/nuget/v/Sqids?style=for-the-badge&logo=nuget&color=008FF7" />
+	</a>
+	<a href="https://www.nuget.org/packages/Sqids">
+		<img alt="Downloads" src="https://img.shields.io/nuget/dt/Sqids?style=for-the-badge" />
+	</a>
+	<a href="https://github.com/sqids/sqids-dotnet/releases">
+		<img alt="Release" src="https://img.shields.io/github/v/release/sqids/sqids-dotnet?style=for-the-badge&color=FB0088" />
+	</a>
+	<a href="https://github.com/sqids/sqids-dotnet/tree/main/src/Sqids">
+		<img alt="Language" src="https://img.shields.io/badge/written_in-C%23-8F00FF?style=for-the-badge" />
+	</a>
+	<a href="LICENSE">
+		<img alt="License" src="https://img.shields.io/github/license/sqids/sqids-dotnet?style=for-the-badge&color=FFA800" />
+	</a>
+</p>
+<p align="center">
+	Sqids (pronounced "squids") is a small library that lets you generate YouTube-looking IDs from numbers. It's good for link shortening, fast & URL-safe ID generation and decoding back into numbers for quicker database lookups.
+</p>
 
-Sqids (pronounced "squids") is a small library that lets you generate YouTube-looking IDs from numbers. It's good for link shortening, fast & URL-safe ID generation and decoding back into numbers for quicker database lookups.
+---
 
-# Getting Started
+## Getting Started
 
 Install the [NuGet package](https://nuget.org/packages/Sqids):
 
@@ -16,7 +41,7 @@ Alternatively, using the .NET CLI:
 dotnet add package Sqids
 ```
 
-# Usage:
+## Usage:
 
 All you need is an instance of `SqidsEncoder`, which is the main class, responsible for both encoding and decoding.
 
@@ -27,14 +52,14 @@ using Sqids;
 var sqids = new SqidsEncoder();
 ```
 
-### Single number:
+#### Single number:
 
 ```cs
 string id = sqids.Encode(1); // "UfB"
 int number = sqids.Decode(id).Single(); // 123
 ```
 
-### Multiple numbers:
+#### Multiple numbers:
 
 ```cs
 string id = sqids.Encode(1, 2, 3); // "8QRLaD"
@@ -44,13 +69,13 @@ int[] numbers = sqids.Decode(id); // new[] { 1, 2, 3 }
 > **Note**
 > Sqids also preserves the order when encoding/decoding multiple numbers.
 
-# Customizations:
+## Customizations:
 
 You can easily customize the alphabet (the characters that Sqids uses to encode the numbers), the minimum length of the IDs (how long the IDs should be at minimum), and the blocklist (the words that should not appear in the IDs), by passing an instance of `SqidsOptions` to the constructor of `SqidsEncoder`.
 
 You can specify all the properties, and any you leave out will fall back to their default values.
 
-### Custom Alphabet:
+#### Custom Alphabet:
 
 You can give Sqids your own custom (ideally shuffled) alphabet to use in the IDs:
 
@@ -65,7 +90,7 @@ var sqids = new SqidsEncoder(new()
 > **Note**
 > It's recommended that you at least provide a shuffled alphabet when using Sqids — even if you want to use the same characters as those the default alphabet — so that your IDs will be unique to you.
 
-### Minimum Length:
+#### Minimum Length:
 
 By default, Sqids uses as few characters as possible to encode a given number. However, if you want all your IDs to be at least a certain length (e.g. for aesthetic reasons), you can configure this via the `MinLength` option:
 
@@ -76,7 +101,7 @@ var sqids = new SqidsEncoder(new()
 });
 ```
 
-### Custom Blocklist:
+#### Custom Blocklist:
 
 Sqids comes with a large default blocklist which will ensure that common cruse words and such never appear anywhere in your IDs.
 You can add extra items to this default blocklist like so:
@@ -91,11 +116,11 @@ var sqids = new SqidsEncoder(new()
 > **Note**
 > Notice how the `new` keyword is omitted in the snippet above (yes, this is valid C#). This way the specified strings are "added" to the default blocklist, as opposed to overriding it — which is what would happen had you done `new() { ... }` (which you're also free to do if that's what you want).
 
-# Advanced Usage:
+## Advanced Usage:
 
-### Decoding a single number:
+#### Decoding a single number:
 
-If you're decoding user-provided input and expect a single number, you can use C# pattern matching to do the necessary check and extract the number in one go:
+If you're decoding user-provided input and expect a single number, you can use C## pattern matching to do the necessary check and extract the number in one go:
 
 ```cs
 if (sqids.Decode(input) is [var singleNumber])
@@ -107,7 +132,7 @@ if (sqids.Decode(input) is [var singleNumber])
 > **Note**
 > This expression ensures that the decoded result is exactly one number, that is, not an empty array (which is what `Decode` returns when the input is invalid), and also not more than one number.
 
-### Ensuring an ID is "canonical":
+#### Ensuring an ID is "canonical":
 
 Due to the design of Sqids's algorithm, decoding random IDs can sometimes produce the same numbers. For example, with the default options, both `2fs` and `OSc` are decoded into the number `3168`. This can be problematic in certain cases, such as when you're using these IDs as part of your URLs to identify resources; this way, the fact that more than one ID decodes into the same number means the same resource would be accessible with two different URLs, which is often undesirable.
 
@@ -128,7 +153,7 @@ if (sqids.Decode(input) is [var id] &&
 }
 ```
 
-### Dependency injection:
+#### Dependency injection:
 
 To use `SqidsEncoder` with a dependency injection system, simply register it as a singleton service:
 
@@ -161,6 +186,6 @@ public class SomeController
 }
 ```
 
-## License
+## License:
 
 [MIT](LICENSE)
