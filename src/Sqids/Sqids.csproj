@@ -14,7 +14,7 @@
 		<PackageIconUrl>https://raw.githubusercontent.com/sqids/sqids-dotnet/main/icon.png</PackageIconUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReleaseNotes>https://github.com/sqids/sqids-dotnet/releases</PackageReleaseNotes>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
 		<PackageProjectUrl>https://sqids.org/dotnet</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>Arad Alvand</Authors>
@@ -28,7 +28,7 @@
 
 	<ItemGroup>
 		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\nuget-readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
