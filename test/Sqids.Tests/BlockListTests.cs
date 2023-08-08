@@ -2,50 +2,50 @@ namespace Sqids.Tests;
 
 public class BlockListTests
 {
-	[Fact]
-	public void DefaultBlockListIfNoneSet()
+	[Test]
+	public void EncodeAndDecode_WithDefaultBlockList_BlocksWordsInDefaultBlockList()
 	{
 		var sqids = new SqidsEncoder();
 
-		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).Should().Be("d171vI");
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).ShouldBe("d171vI");
 	}
 
-	[Fact]
-	public void NoBlockListIfReset()
+	[Test]
+	public void EncodeAndDecode_WithEmptyBlockList_DoesNotBlockWords()
 	{
 		var sqids = new SqidsEncoder(new()
 		{
 			BlockList = new(),
 		});
 
-		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).Should().Be("sexy");
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).ShouldBe("sexy");
 	}
 
-	[Fact]
-	public void OnlyCustomBlockListIfSet()
+	[Test]
+	public void EncodeAndDecode_WithCustomBlockList_OnlyBlocksWordsInCustomBlockList()
 	{
 		var sqids = new SqidsEncoder(new()
 		{
 			BlockList = new()
 			{
-				"AvTg" // Originally encoded [100000]
+				"AvTg" // NOTE: The default encoding of 100000.
 			},
 		});
 
-		// Make sure the default blocklist isn't used
-		sqids.Decode("sexy").Should().BeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).Should().Be("sexy");
+		// NOTE: Make sure the default blocklist isn't used
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Encode(200044).ShouldBe("sexy");
 
-		// Make sure the passed blocklist IS used:
-		sqids.Decode("AvTg").Should().BeEquivalentTo(new[] { 100000 });
-		sqids.Encode(100000).Should().Be("7T1X8k");
-		sqids.Decode("7T1X8k").Should().BeEquivalentTo(new[] { 100000 });
+		// NOTE: Make sure the passed blocklist IS used:
+		sqids.Decode("AvTg").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Encode(100000).ShouldBe("7T1X8k");
+		sqids.Decode("7T1X8k").ShouldBeEquivalentTo(new[] { 100000 });
 	}
 
-	[Fact]
-	public void CustomBlockList()
+	[Test]
+	public void EncodeAndDecode_WithBlockListBlockingMultipleEncodings_RespectsBlockList()
 	{
 		var sqids = new SqidsEncoder(new()
 		{
@@ -59,12 +59,12 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Encode(1, 2, 3).Should().Be("TM0x1Mxz");
-		sqids.Decode("TM0x1Mxz").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Encode(1, 2, 3).ShouldBe("TM0x1Mxz");
+		sqids.Decode("TM0x1Mxz").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
 	}
 
-	[Fact]
-	public void DecodingBlockedWordsShouldWork()
+	[Test]
+	public void Decode_BlockedIds_StillDecodesSuccessfully()
 	{
 		var sqids = new SqidsEncoder(new()
 		{
@@ -78,24 +78,24 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Decode("8QRLaD").Should().BeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("7T1cd0dL").Should().BeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("RA8UeIe7").Should().BeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("WM3Limhw").Should().BeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("LfUQh4HN").Should().BeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("8QRLaD").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("7T1cd0dL").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("RA8UeIe7").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("WM3Limhw").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("LfUQh4HN").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
 	}
 
-	[Fact]
-	public void MatchAgainstShortBlockListWord()
+	[Test]
+	public void EncodeAndDecode_WithShortCustomBlockList_RoundTripsSuccessfully()
 	{
 		var sqids = new SqidsEncoder(new()
 		{
 			BlockList = new()
 			{
-				"pPQ",
+				"pPQ", // NOTE: This is the default encoding of `1000`.
 			},
 		});
 
-		sqids.Decode(sqids.Encode(1000)).Should().BeEquivalentTo(new[] { 1000 });
+		sqids.Decode(sqids.Encode(1000)).ShouldBeEquivalentTo(new[] { 1000 });
 	}
 }
