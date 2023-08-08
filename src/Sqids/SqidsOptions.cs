@@ -2,8 +2,7 @@ namespace Sqids;
 
 /// <summary>
 /// The configuration options for <see cref="SqidsEncoder" />.
-/// All properties are optional; any property that isn't explicitly specified when passing an
-/// instance of this class to the constructor of <see cref="SqidsEncoder" /> will fall back to its
+/// All properties are optional; any property that isn't explicitly specified will fall back to its
 /// default value.
 /// </summary>
 public sealed class SqidsOptions

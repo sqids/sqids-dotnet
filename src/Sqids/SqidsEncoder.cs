@@ -1,7 +1,7 @@
 ﻿namespace Sqids;
 
 /// <summary>
-/// The Sqids encoder/decoder.
+/// The Sqids encoder/decoder. This is the main class.
 /// </summary>
 public sealed class SqidsEncoder
 {
@@ -14,7 +14,7 @@ public sealed class SqidsEncoder
 
 	/// <summary>
 	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
-	/// It's always zero across all ports of Sqids.
+	/// This is always zero across all ports of Sqids.
 	/// </summary>
 	public const int MinValue = 0;
 
@@ -35,7 +35,7 @@ public sealed class SqidsEncoder
 	/// <param name="options">
 	/// The custom options.
 	/// All properties of <see cref="SqidsOptions" /> are optional and will fall back to their
-	/// defaults unless explicitly set.
+	/// defaults if not explicitly set.
 	/// </param>
 	public SqidsEncoder(SqidsOptions options)
 	{
@@ -209,13 +209,13 @@ public sealed class SqidsEncoder
 	}
 
 	/// <summary>
-	/// Decodes a string into its original .
+	/// Decodes an ID into numbers.
 	/// </summary>
 	/// <param name="id">The encoded ID.</param>
 	/// <returns>
-	/// A collection of integers containing the decoded number(s); or empty an collection if the
-	/// input string is null, empty, contains fewer characters than the configured minimum length,
-	/// or includes characters not found in the alphabet.
+	/// An array of integers containing the decoded number(s) (it would contain only one element
+	/// if the ID represents a single number); or an empty array if the input ID is null,
+	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
 	public int[] Decode(ReadOnlySpan<char> id)
 	{
