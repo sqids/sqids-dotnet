@@ -56,7 +56,7 @@ var sqids = new SqidsEncoder();
 
 ```cs
 string id = sqids.Encode(1); // "UfB"
-int number = sqids.Decode(id).Single(); // 123
+int number = sqids.Decode(id).Single(); // 1
 ```
 
 #### Multiple numbers:
