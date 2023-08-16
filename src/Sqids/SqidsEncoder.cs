@@ -59,7 +59,7 @@ public sealed class SqidsEncoder
 			w.Length < 3 || // NOTE: Removes words that are less than 3 characters long
 			w.Any(c => !options.Alphabet.Contains(c)) // NOTE: Removes words that contain characters not found in the alphabet
 		);
-		_blockList = options.BlockList.ToArray(); // NOTE: An array is faster to iterate over compared to a HashSet, so we construct and array here.
+		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
 		Span<char> shuffledAlphabet = options.Alphabet.Length * sizeof(char) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
 			? new char[options.Alphabet.Length]
@@ -255,13 +255,18 @@ public sealed class SqidsEncoder
 			char separator = alphabetTemp[^1];
 
 			var separatorIndex = id.IndexOf(separator);
-			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` to the left of the separator is the number that we ought to decode.
-			id = separatorIndex == -1 ? string.Empty : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id ` for the next iteration
+			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` (every thing to the left of the separator) represents the number that we ought to decode.
+			id = separatorIndex == -1 ? string.Empty : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
 
 			if (chunk.IsEmpty)
 				continue;
 
 			var alphabetWithoutSeparator = alphabetTemp[..^1]; // NOTE: Exclude the last character from the alphabet (which is the separator)
+
+			foreach (char c in chunk)
+				if (!alphabetWithoutSeparator.Contains(c))
+					return Array.Empty<int>();
+
 			var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
 			result.Add(decodedNumber);
 
