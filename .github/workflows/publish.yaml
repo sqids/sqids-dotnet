@@ -1,0 +1,37 @@
+name: Publish To NuGet
+
+on:
+  release: # NOTE: See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+    types:
+      - published
+
+jobs:
+  # TODO: Have this depend on `test.yaml`
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "7.x" # TODO: Specify multiple .NET versions once we add support for other target frameworks
+
+      - name: Generate the package
+        # NOTE: As for the `${GITHUB_REF_NAME#v}` bit below, see https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables:~:text=branch%2D1.-,GITHUB_REF_NAME,-The%20short%20ref. We could've also done https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable but since we're using this value in a single place, we don't need to make it an environment variable.
+        run: |
+          dotnet pack \
+            --configuration Release
+            --output _nuget
+            -p:PackageVersion=${GITHUB_REF_NAME#v}
+
+      # TODO: Changelog?
+
+      - name: Push the package to NuGet
+        run: |
+          dotnet nuget push \
+            _nuget\*.nupkg
+            --source https://api.nuget.org/v3/index.json
+            --api-key ${{ secrets.NUGET_API_KEY }}

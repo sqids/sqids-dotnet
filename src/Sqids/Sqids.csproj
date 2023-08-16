@@ -8,9 +8,7 @@
 		<OutputType>Library</OutputType>
 
 		<PackageId>Sqids</PackageId>
-		<Version>1.0.4</Version>
 		<Description>Official .NET port of Sqids. Generate short YouTube-looking IDs from numbers.</Description>
-		<PackRelease>true</PackRelease>
 		<PackageTags>Sqids;ID-generator;number-obfuscator;YouTube-ID</PackageTags>
 		<PackageIconUrl>https://raw.githubusercontent.com/sqids/sqids-dotnet/main/icon.png</PackageIconUrl>
 		<PackageIcon>icon.png</PackageIcon>

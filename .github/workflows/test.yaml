@@ -1,0 +1,23 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "7.x" # TODO: Specify multiple .NET versions once we add support for other target frameworks
+
+      # TODO: Some .NET codebases with GitHub Actions workflows seem to run `dotnet restore`, `dotnet build` and `dotnet test` as separate steps. Why?
+      - name: Run the tests
+        run: dotnet test --configuration Release
