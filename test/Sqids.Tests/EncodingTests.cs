@@ -73,12 +73,13 @@ public class EncodingTests
 		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
 	}
 
-	[Test]
-	public void Decode_CharactersNotInAlphabet_ReturnsEmptyArray()
+	[TestCase("*")] // NOTE: Character not found in the alphabet
+	[TestCase("fff")] // NOTE: Repeating reserved character
+	public void Decode_WithInvalidCharacters_ReturnsEmptyArray(string id)
 	{
 		var sqids = new SqidsEncoder();
 
-		sqids.Decode("*").ShouldBeEmpty();
+		sqids.Decode(id).ShouldBeEmpty();
 	}
 
 	[Test]
