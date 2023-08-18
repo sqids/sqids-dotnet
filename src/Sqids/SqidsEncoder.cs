@@ -1,4 +1,4 @@
-﻿namespace Sqids;
+namespace Sqids;
 
 /// <summary>
 /// The Sqids encoder/decoder. This is the main class.
@@ -179,7 +179,7 @@ public sealed class SqidsEncoder
 			}
 		}
 
-		if (IsBlockedId(result))
+		if (IsBlockedId(result.AsSpan()))
 		{
 			Span<int> newNumbers = numbers.Length * sizeof(int) > MaxStackallocSize
 				? new int[numbers.Length]
@@ -256,7 +256,7 @@ public sealed class SqidsEncoder
 
 			var separatorIndex = id.IndexOf(separator);
 			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` (every thing to the left of the separator) represents the number that we ought to decode.
-			id = separatorIndex == -1 ? string.Empty : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
+			id = separatorIndex == -1 ? default : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
 
 			if (chunk.IsEmpty)
 				continue;
@@ -285,15 +285,15 @@ public sealed class SqidsEncoder
 				continue;
 
 			if ((id.Length <= 3 || word.Length <= 3) &&
-				id.Equals(word, StringComparison.OrdinalIgnoreCase))
+				id.Equals(word.AsSpan(), StringComparison.OrdinalIgnoreCase))
 				return true;
 
 			if (word.Any(char.IsDigit) &&
-				(id.StartsWith(word, StringComparison.OrdinalIgnoreCase) ||
-				 id.EndsWith(word, StringComparison.OrdinalIgnoreCase)))
+				(id.StartsWith(word.AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+				 id.EndsWith(word.AsSpan(), StringComparison.OrdinalIgnoreCase)))
 				return true;
 
-			if (id.Contains(word, StringComparison.OrdinalIgnoreCase))
+			if (id.Contains(word.AsSpan(), StringComparison.OrdinalIgnoreCase))
 				return true;
 		}
 
@@ -321,7 +321,7 @@ public sealed class SqidsEncoder
 			result = result / alphabet.Length;
 		} while (result > 0);
 
-		return id.ToString(); // TODO: possibly avoid creating a string
+		return id.ToString().AsSpan(); // TODO: possibly avoid creating a string
 	}
 
 	private static int ToNumber(ReadOnlySpan<char> id, ReadOnlySpan<char> alphabet)

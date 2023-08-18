@@ -26,7 +26,7 @@ public class UniquenessTests
 			var numbers = Enumerable.Repeat(i, numbersCount).ToArray();
 			var id = sqids.Encode(numbers);
 			hashSet.Add(id);
-			sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+			sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(numbers);
 		}
 
 		hashSet.Count.ShouldBe(range); // NOTE: Ensures that all the IDs were unique.
