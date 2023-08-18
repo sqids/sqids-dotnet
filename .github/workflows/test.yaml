@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest # NOTE: Has to be Windows because the old .NET Framework 4.x (which is one of the target frameworks of the test project) is Windows-only
 
     steps:
       - name: Checkout the repository
@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "7.x" # TODO: Specify multiple .NET versions once we add support for other target frameworks
+          dotnet-version: 7.0.x # NOTE: The `windows-latest` container already comes pre-installed with the .NET versions that we need, but we do need to use `setup-dotnet` (and pass it one of the versions — e.g. 7.0.x), so that the relevant binaries (e.g. `dotnet`) are actually added to PATH so we can use them. See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#preinstalled-software and https://github.com/actions/setup-dotnet
 
       # TODO: Some .NET codebases with GitHub Actions workflows seem to run `dotnet restore`, `dotnet build` and `dotnet test` as separate steps. Why?
       - name: Run the tests

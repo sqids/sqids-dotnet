@@ -1,4 +1,4 @@
-﻿namespace Sqids;
+namespace Sqids;
 
 /// <summary>
 /// The Sqids encoder/decoder. This is the main class.
@@ -179,7 +179,7 @@ public sealed class SqidsEncoder
 			}
 		}
 
-		if (IsBlockedId(result))
+		if (IsBlockedId(result.AsSpan()))
 		{
 			Span<int> newNumbers = numbers.Length * sizeof(int) > MaxStackallocSize
 				? new int[numbers.Length]
@@ -256,7 +256,7 @@ public sealed class SqidsEncoder
 
 			var separatorIndex = id.IndexOf(separator);
 			var chunk = separatorIndex == -1 ? id : id[..separatorIndex]; // NOTE: The first part of `id` (every thing to the left of the separator) represents the number that we ought to decode.
-			id = separatorIndex == -1 ? string.Empty : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
+			id = separatorIndex == -1 ? default : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
 
 			if (chunk.IsEmpty)
 				continue;
@@ -277,6 +277,20 @@ public sealed class SqidsEncoder
 		return result.ToArray(); // TODO: A way to return an array without creating a new array from the list like this?
 	}
 
+	// NOTE: Implicit `string` => `Span<char>` conversion was introduced in .NET Standard 2.1 (see https://learn.microsoft.com/en-us/dotnet/api/system.string.op_implicit), which means without this overload, calling `Decode` with a string on versions older than .NET Standard 2.1 would require calling `.AsSpan()` on the string, which is cringe.
+#if NETSTANDARD2_0
+	/// <summary>
+	/// Decodes an ID into numbers.
+	/// </summary>
+	/// <param name="id">The encoded ID.</param>
+	/// <returns>
+	/// An array of integers containing the decoded number(s) (it would contain only one element
+	/// if the ID represents a single number); or an empty array if the input ID is null,
+	/// empty, or includes characters not found in the alphabet.
+	/// </returns>
+	public int[] Decode(string id) => Decode(id.AsSpan());
+#endif
+
 	private bool IsBlockedId(ReadOnlySpan<char> id)
 	{
 		foreach (string word in _blockList)
@@ -285,15 +299,15 @@ public sealed class SqidsEncoder
 				continue;
 
 			if ((id.Length <= 3 || word.Length <= 3) &&
-				id.Equals(word, StringComparison.OrdinalIgnoreCase))
+				id.Equals(word.AsSpan(), StringComparison.OrdinalIgnoreCase))
 				return true;
 
 			if (word.Any(char.IsDigit) &&
-				(id.StartsWith(word, StringComparison.OrdinalIgnoreCase) ||
-				 id.EndsWith(word, StringComparison.OrdinalIgnoreCase)))
+				(id.StartsWith(word.AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+				 id.EndsWith(word.AsSpan(), StringComparison.OrdinalIgnoreCase)))
 				return true;
 
-			if (id.Contains(word, StringComparison.OrdinalIgnoreCase))
+			if (id.Contains(word.AsSpan(), StringComparison.OrdinalIgnoreCase))
 				return true;
 		}
 
@@ -321,7 +335,7 @@ public sealed class SqidsEncoder
 			result = result / alphabet.Length;
 		} while (result > 0);
 
-		return id.ToString(); // TODO: possibly avoid creating a string
+		return id.ToString().AsSpan(); // TODO: possibly avoid creating a string
 	}
 
 	private static int ToNumber(ReadOnlySpan<char> id, ReadOnlySpan<char> alphabet)
