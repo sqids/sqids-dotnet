@@ -1,6 +1,5 @@
 #if NETSTANDARD2_0
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace Sqids;
@@ -31,7 +30,7 @@ internal static class PolyfillExtensions
 
 		if (!value.IsEmpty)
 		{
-			// Unfortunately, not much we can do here; the StringBuilder.Insert(int, char*, int) method is private.
+			// NOTE: Unfortunately, not much we can do here; the StringBuilder.Insert(int, char*, int) method is private.
 			char[] temp = new char[value.Length];
 			value.CopyTo(temp);
 			builder.Insert(index, temp);
@@ -40,7 +39,8 @@ internal static class PolyfillExtensions
 		return builder;
 	}
 
-	public static bool Contains(this Span<char> source, char toFind) => source.IndexOf(toFind) != -1;
+	public static bool Contains(this Span<char> source, char toFind) =>
+		source.IndexOf(toFind) != -1;
 }
 
 #endif

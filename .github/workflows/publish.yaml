@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "7.x" # TODO: Specify multiple .NET versions once we add support for other target frameworks
+          dotnet-version: 7.0.x
 
       - name: Generate the package
         # NOTE: As for the `${GITHUB_REF_NAME#v}` bit below, see https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables:~:text=branch%2D1.-,GITHUB_REF_NAME,-The%20short%20ref. We could've also done https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable but since we're using this value in a single place, we don't need to make it an environment variable.

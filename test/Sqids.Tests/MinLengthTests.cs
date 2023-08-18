@@ -18,7 +18,7 @@ public class MinLengthTests
 		var sqids = new SqidsEncoder(new() { MinLength = new SqidsOptions().Alphabet.Length }); // NOTE: This is how we get the default alphabet
 
 		sqids.Encode(numbers).ShouldBe(id);
-		sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
 	[Test, Combinatorial]
@@ -31,7 +31,7 @@ public class MinLengthTests
 
 		var id = sqids.Encode(numbers);
 		id.Length.ShouldBeGreaterThanOrEqualTo(minLength);
-		sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 	private static int[] MinLengths => new[] { 0, 1, 5, 10, new SqidsOptions().Alphabet.Length }; // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[Values]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
 	private static int[][] Numbers => new[]

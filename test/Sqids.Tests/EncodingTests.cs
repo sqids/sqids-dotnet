@@ -18,7 +18,7 @@ public class EncodingTests
 		var sqids = new SqidsEncoder();
 
 		sqids.Encode(number).ShouldBe(id);
-		sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(new[] { number });
+		sqids.Decode(id).ShouldBeEquivalentTo(new[] { number });
 	}
 
 	// NOTE: Simple case
@@ -53,7 +53,7 @@ public class EncodingTests
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Encode(numbers.ToList()).ShouldBe(id); // NOTE: Selects the `IEnumerable<int>` overload
-		sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
 	[TestCase(new[] {
@@ -70,7 +70,7 @@ public class EncodingTests
 	{
 		var sqids = new SqidsEncoder();
 
-		sqids.Decode(sqids.Encode(numbers).AsSpan()).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
 	}
 
 	[TestCase("*")] // NOTE: Character not found in the alphabet
@@ -79,7 +79,7 @@ public class EncodingTests
 	{
 		var sqids = new SqidsEncoder();
 
-		sqids.Decode(id.AsSpan()).ShouldBeEmpty();
+		sqids.Decode(id).ShouldBeEmpty();
 	}
 
 	[Test]

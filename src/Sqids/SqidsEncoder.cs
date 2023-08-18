@@ -277,6 +277,20 @@ public sealed class SqidsEncoder
 		return result.ToArray(); // TODO: A way to return an array without creating a new array from the list like this?
 	}
 
+	// NOTE: Implicit `string` => `Span<char>` conversion was introduced in .NET Standard 2.1 (see https://learn.microsoft.com/en-us/dotnet/api/system.string.op_implicit), which means without this overload, calling `Decode` with a string on versions older than .NET Standard 2.1 would require calling `.AsSpan()` on the string, which is cringe.
+#if NETSTANDARD2_0
+	/// <summary>
+	/// Decodes an ID into numbers.
+	/// </summary>
+	/// <param name="id">The encoded ID.</param>
+	/// <returns>
+	/// An array of integers containing the decoded number(s) (it would contain only one element
+	/// if the ID represents a single number); or an empty array if the input ID is null,
+	/// empty, or includes characters not found in the alphabet.
+	/// </returns>
+	public int[] Decode(string id) => Decode(id.AsSpan());
+#endif
+
 	private bool IsBlockedId(ReadOnlySpan<char> id)
 	{
 		foreach (string word in _blockList)
