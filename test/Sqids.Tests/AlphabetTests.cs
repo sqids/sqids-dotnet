@@ -12,7 +12,7 @@ public class AlphabetTests
 		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
 
 		sqids.Encode(numbers).ShouldBe(id);
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id.AsSpan()).ShouldBeEquivalentTo(numbers);
 	}
 
 	[TestCase("abcde", new[] { 1, 2, 3 })] // NOTE: Short alphabet
@@ -24,7 +24,7 @@ public class AlphabetTests
 	{
 		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
 
-		sqids.Decode(sqids.Encode(numbers)).ShouldBe(numbers);
+		sqids.Decode(sqids.Encode(numbers).AsSpan()).ShouldBe(numbers);
 	}
 
 	[TestCase("aabcdefg")] // NOTE: Repeated characters
