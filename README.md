@@ -22,10 +22,19 @@
 	</a>
 </p>
 <p align="center">
-	Sqids (pronounced "squids") is a small library that lets you generate YouTube-looking IDs from numbers. It's good for link shortening, fast & URL-safe ID generation and decoding back into numbers for quicker database lookups.
+	Sqids (<em>pronounced "squids"</em>) is a small library that lets you generate YouTube-like IDs from numbers. It encodes numbers like <code>127</code> into strings like <code>yc3</code>, which you can then decode back into the original numbers. Sqids is useful for when you want to hide numbers (like sequential numeric IDs) into random-looking strings to be used in URLs and elsewhere.
 </p>
 
 ---
+
+## Features:
+
+-   💎 **Unique IDs:** The IDs that Sqids generates are unique and always decode into the same numbers. You can also make them unique to your application (so that they're not the same as everyone else who uses Sqids) by providing a [shuffled alphabet](#custom-alphabet).
+-   🔢 **Multiple Numbers:** You can bundle more than one number into one string, and then decode the string back to the same set of numbers.
+-   👁 **"Eye-safe":** Sqids makes sure that the IDs it generates do not contain common profanity, so you can safely use these IDs where end-users can see them (e.g. in URLs).
+-   🤹‍♀️ **Randomized Output:** Encoding sequential numbers (1, 2, 3...) yields completely different-looking IDs.
+-   ⚡ **Blazingly Fast:** With an optimized span-based implementation that minimizes memory allocation and maximizes performance.
+-   ✅ **Meticulously Tested:** Sqids has a comprehensive test suite that covers numerous edge cases, so you can expect a bug-free experience.
 
 ## Getting Started
 
