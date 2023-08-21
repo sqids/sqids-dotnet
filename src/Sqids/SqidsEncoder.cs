@@ -19,7 +19,7 @@ public sealed class SqidsEncoder
 	public const int MinValue = 0;
 
 	/// <summary>
-	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
+	/// The maximum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
 	/// It's equal to `int.MaxValue`.
 	/// </summary>
 	public const int MaxValue = int.MaxValue;
