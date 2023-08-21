@@ -85,6 +85,16 @@ public sealed class SqidsEncoder
 	}
 
 	/// <summary>
+	/// Encodes a single number into a Sqids ID.
+	/// </summary>
+	/// <param name="number">The number to encode.</param>
+	/// <returns>A string containing the encoded ID.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string EncodeInt(int number) =>
+		Encode((long)number);
+
+	/// <summary>
 	/// Encodes multiple numbers into a Sqids ID.
 	/// </summary>
 	/// <param name="numbers">The numbers to encode.</param>
@@ -103,6 +113,16 @@ public sealed class SqidsEncoder
 	}
 
 	/// <summary>
+	/// Encodes multiple numbers into a Sqids ID.
+	/// </summary>
+	/// <param name="numbers">The numbers to encode.</param>
+	/// <returns>A string containing the encoded IDs, or an empty string if the array passed is empty.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string EncodeInt(params int[] numbers) =>
+		Encode(numbers.CastToInt64().ToArray());
+
+	/// <summary>
 	/// Encodes a collection of numbers into a Sqids ID.
 	/// </summary>
 	/// <param name="numbers">The numbers to encode.</param>
@@ -111,6 +131,16 @@ public sealed class SqidsEncoder
 	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
 	public string Encode(IEnumerable<long> numbers) =>
 		Encode(numbers.ToArray());
+
+	/// <summary>
+	/// Encodes a collection of numbers into a Sqids ID.
+	/// </summary>
+	/// <param name="numbers">The numbers to encode.</param>
+	/// <returns>A string containing the encoded IDs, or an empty string if the `IEnumerable` passed is empty.</returns>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string EncodeInt(IEnumerable<int> numbers) =>
+		Encode(numbers.CastToInt64());
 
 	// TODO: Consider using `ArrayPool` if possible
 	private string Encode(ReadOnlySpan<long> numbers, bool partitioned = false)
@@ -277,6 +307,18 @@ public sealed class SqidsEncoder
 		return result.ToArray(); // TODO: A way to return an array without creating a new array from the list like this?
 	}
 
+	/// <summary>
+	/// Decodes an ID into numbers.
+	/// </summary>
+	/// <param name="id">The encoded ID.</param>
+	/// <returns>
+	/// An array of long integers containing the decoded number(s) (it would contain only one element
+	/// if the ID represents a single number); or an empty array if the input ID is null,
+	/// empty, or includes characters not found in the alphabet.
+	/// </returns>
+	public int[] DecodeInt(ReadOnlySpan<char> id) =>
+		Decode(id).CastToInt32().ToArray();
+
 	// NOTE: Implicit `string` => `Span<char>` conversion was introduced in .NET Standard 2.1 (see https://learn.microsoft.com/en-us/dotnet/api/system.string.op_implicit), which means without this overload, calling `Decode` with a string on versions older than .NET Standard 2.1 would require calling `.AsSpan()` on the string, which is cringe.
 #if NETSTANDARD2_0
 	/// <summary>
@@ -289,6 +331,17 @@ public sealed class SqidsEncoder
 	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
 	public long[] Decode(string id) => Decode(id.AsSpan());
+
+	/// <summary>
+	/// Decodes an ID into numbers.
+	/// </summary>
+	/// <param name="id">The encoded ID.</param>
+	/// <returns>
+	/// An array of long integers containing the decoded number(s) (it would contain only one element
+	/// if the ID represents a single number); or an empty array if the input ID is null,
+	/// empty, or includes characters not found in the alphabet.
+	/// </returns>
+	public int[] DecodeInt(string id) => DecodeInt(id.AsSpan());
 #endif
 
 	private bool IsBlockedId(ReadOnlySpan<char> id)
