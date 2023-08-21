@@ -2,10 +2,10 @@ namespace Sqids.Tests;
 
 public class AlphabetTests
 {
-	[TestCase("0123456789abcdef", new[] { 1, 2, 3 }, "4d9fd2")]
+	[TestCase("0123456789abcdef", new long[] { 1, 2, 3 }, "4d9fd2")]
 	public void EncodeAndDecode_WithCustomAlphabet_ReturnsExactMatch(
 		string alphabet,
-		int[] numbers,
+		long[] numbers,
 		string id
 	)
 	{
@@ -15,11 +15,11 @@ public class AlphabetTests
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
-	[TestCase("abcde", new[] { 1, 2, 3 })] // NOTE: Short alphabet
-	[TestCase("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~", new[] { 1, 2, 3 })] // NOTE: Long short
+	[TestCase("abcde", new long[] { 1, 2, 3 })] // NOTE: Short alphabet
+	[TestCase("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~", new long[] { 1, 2, 3 })] // NOTE: Long short
 	public void EncodeAndDecode_WithCustomAlphabet_RoundTripsSuccessfully(
 		string alphabet,
-		int[] numbers
+		long[] numbers
 	)
 	{
 		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });

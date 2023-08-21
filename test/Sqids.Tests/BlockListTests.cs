@@ -7,7 +7,7 @@ public class BlockListTests
 	{
 		var sqids = new SqidsEncoder();
 
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new long[] { 200044 });
 		sqids.Encode(200044).ShouldBe("d171vI");
 	}
 
@@ -19,7 +19,7 @@ public class BlockListTests
 			BlockList = new(),
 		});
 
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new long[] { 200044 });
 		sqids.Encode(200044).ShouldBe("sexy");
 	}
 
@@ -35,13 +35,13 @@ public class BlockListTests
 		});
 
 		// NOTE: Make sure the default blocklist isn't used
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
+		sqids.Decode("sexy").ShouldBeEquivalentTo(new long[] { 200044 });
 		sqids.Encode(200044).ShouldBe("sexy");
 
 		// NOTE: Make sure the passed blocklist IS used:
-		sqids.Decode("AvTg").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Decode("AvTg").ShouldBeEquivalentTo(new long[] { 100000 });
 		sqids.Encode(100000).ShouldBe("7T1X8k");
-		sqids.Decode("7T1X8k").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Decode("7T1X8k").ShouldBeEquivalentTo(new long[] { 100000 });
 	}
 
 	[Test]
@@ -60,7 +60,7 @@ public class BlockListTests
 		});
 
 		sqids.Encode(1, 2, 3).ShouldBe("TM0x1Mxz");
-		sqids.Decode("TM0x1Mxz").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("TM0x1Mxz").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
 	}
 
 	[Test]
@@ -78,11 +78,11 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Decode("8QRLaD").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("7T1cd0dL").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("RA8UeIe7").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("WM3Limhw").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("LfUQh4HN").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("8QRLaD").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
+		sqids.Decode("7T1cd0dL").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
+		sqids.Decode("RA8UeIe7").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
+		sqids.Decode("WM3Limhw").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
+		sqids.Decode("LfUQh4HN").ShouldBeEquivalentTo(new long[] { 1, 2, 3 });
 	}
 
 	[Test]
@@ -96,6 +96,6 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Decode(sqids.Encode(1000)).ShouldBeEquivalentTo(new[] { 1000 });
+		sqids.Decode(sqids.Encode(1000)).ShouldBeEquivalentTo(new long[] { 1000 });
 	}
 }

@@ -7,7 +7,7 @@ public class UniquenessTests
 	[TestCase(0, 5)] // NOTE: Multiple numbers
 	[TestCase(0, 1, true)] // NOTE: With maximum padding (i.e. min length)
 	public void EncodeAndDecode_LargeRange_ReturnsUniqueIdsAndRoundTripsSuccessfully(
-		int startingPoint,
+		long startingPoint,
 		int numbersCount,
 		bool maxPadding = false
 	)
@@ -21,7 +21,7 @@ public class UniquenessTests
 
 		var hashSet = new HashSet<string>();
 
-		for (int i = startingPoint; i < startingPoint + range; i++)
+		for (long i = startingPoint; i < startingPoint + range; i++)
 		{
 			var numbers = Enumerable.Repeat(i, numbersCount).ToArray();
 			var id = sqids.Encode(numbers);

@@ -16,13 +16,13 @@ public sealed class SqidsEncoder
 	/// The minimum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
 	/// This is always zero across all ports of Sqids.
 	/// </summary>
-	public const int MinValue = 0;
+	public const long MinValue = 0;
 
 	/// <summary>
 	/// The maximum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
-	/// It's equal to `int.MaxValue`.
+	/// It's equal to `long.MaxValue`.
 	/// </summary>
-	public const int MaxValue = int.MaxValue;
+	public const long MaxValue = long.MaxValue;
 
 	/// <summary>
 	/// Initializes a new instance of <see cref="SqidsEncoder" /> with the default options.
@@ -74,9 +74,9 @@ public sealed class SqidsEncoder
 	/// </summary>
 	/// <param name="number">The number to encode.</param>
 	/// <returns>A string containing the encoded ID.</returns>
-	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
-	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
-	public string Encode(int number)
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string Encode(long number)
 	{
 		if (number < MinValue || number > MaxValue)
 			throw new ArgumentOutOfRangeException($"Encoding supports numbers between '{MinValue}' and '{MaxValue}'.");
@@ -89,9 +89,9 @@ public sealed class SqidsEncoder
 	/// </summary>
 	/// <param name="numbers">The numbers to encode.</param>
 	/// <returns>A string containing the encoded IDs, or an empty string if the array passed is empty.</returns>
-	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
-	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
-	public string Encode(params int[] numbers)
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string Encode(params long[] numbers)
 	{
 		if (numbers.Length == 0)
 			return string.Empty;
@@ -107,13 +107,13 @@ public sealed class SqidsEncoder
 	/// </summary>
 	/// <param name="numbers">The numbers to encode.</param>
 	/// <returns>A string containing the encoded IDs, or an empty string if the `IEnumerable` passed is empty.</returns>
-	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `int.MaxValue`).</exception>
-	/// <exception cref="T:System.OverflowException">If the decoded number overflows integer.</exception>
-	public string Encode(IEnumerable<int> numbers) =>
+	/// <exception cref="T:System.ArgumentOutOfRangeException">If any of the long integers passed is smaller than <see cref="MinValue"/> (i.e. negative) or greater than <see cref="MaxValue"/> (i.e. `long.MaxValue`).</exception>
+	/// <exception cref="T:System.OverflowException">If the decoded number overflows long integer.</exception>
+	public string Encode(IEnumerable<long> numbers) =>
 		Encode(numbers.ToArray());
 
 	// TODO: Consider using `ArrayPool` if possible
-	private string Encode(ReadOnlySpan<int> numbers, bool partitioned = false)
+	private string Encode(ReadOnlySpan<long> numbers, bool partitioned = false)
 	{
 		int offset = 0;
 		for (int i = 0; i < numbers.Length; i++)
@@ -136,7 +136,7 @@ public sealed class SqidsEncoder
 
 		for (int i = 0; i < numbers.Length; i++)
 		{
-			int number = numbers[i];
+			long number = numbers[i];
 
 			var alphabetWithoutSeparator = alphabetTemp[..^1];
 			var encodedNumber = ToId(number, alphabetWithoutSeparator);
@@ -162,9 +162,9 @@ public sealed class SqidsEncoder
 		{
 			if (!partitioned)
 			{
-				Span<int> newNumbers = (numbers.Length + 1) * sizeof(int) > MaxStackallocSize
-					? new int[numbers.Length + 1]
-					: stackalloc int[numbers.Length + 1];
+				Span<long> newNumbers = (numbers.Length + 1) * sizeof(long) > MaxStackallocSize
+					? new long[numbers.Length + 1]
+					: stackalloc long[numbers.Length + 1];
 				newNumbers[0] = 0;
 				numbers.CopyTo(newNumbers[1..]);
 				result = Encode(newNumbers, partitioned: true);
@@ -181,9 +181,9 @@ public sealed class SqidsEncoder
 
 		if (IsBlockedId(result.AsSpan()))
 		{
-			Span<int> newNumbers = numbers.Length * sizeof(int) > MaxStackallocSize
-				? new int[numbers.Length]
-				: stackalloc int[numbers.Length];
+			Span<long> newNumbers = numbers.Length * sizeof(long) > MaxStackallocSize
+				? new long[numbers.Length]
+				: stackalloc long[numbers.Length];
 			numbers.CopyTo(newNumbers);
 
 			if (partitioned)
@@ -195,9 +195,9 @@ public sealed class SqidsEncoder
 			}
 			else
 			{
-				newNumbers = (numbers.Length + 1) * sizeof(int) > MaxStackallocSize
-					? new int[numbers.Length + 1]
-					: stackalloc int[numbers.Length + 1];
+				newNumbers = (numbers.Length + 1) * sizeof(long) > MaxStackallocSize
+					? new long[numbers.Length + 1]
+					: stackalloc long[numbers.Length + 1];
 				newNumbers[0] = 0;
 				numbers.CopyTo(newNumbers[1..]);
 			}
@@ -213,18 +213,18 @@ public sealed class SqidsEncoder
 	/// </summary>
 	/// <param name="id">The encoded ID.</param>
 	/// <returns>
-	/// An array of integers containing the decoded number(s) (it would contain only one element
+	/// An array of long integers containing the decoded number(s) (it would contain only one element
 	/// if the ID represents a single number); or an empty array if the input ID is null,
 	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
-	public int[] Decode(ReadOnlySpan<char> id)
+	public long[] Decode(ReadOnlySpan<char> id)
 	{
 		if (id.IsEmpty)
-			return Array.Empty<int>();
+			return Array.Empty<long>();
 
 		foreach (char c in id)
 			if (!_alphabet.Contains(c))
-				return Array.Empty<int>();
+				return Array.Empty<long>();
 
 		var alphabetSpan = _alphabet.AsSpan();
 
@@ -248,7 +248,7 @@ public sealed class SqidsEncoder
 			ConsistentShuffle(alphabetTemp);
 		}
 
-		var result = new List<int>();
+		var result = new List<long>();
 
 		while (!id.IsEmpty)
 		{
@@ -265,7 +265,7 @@ public sealed class SqidsEncoder
 
 			foreach (char c in chunk)
 				if (!alphabetWithoutSeparator.Contains(c))
-					return Array.Empty<int>();
+					return Array.Empty<long>();
 
 			var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
 			result.Add(decodedNumber);
@@ -284,11 +284,11 @@ public sealed class SqidsEncoder
 	/// </summary>
 	/// <param name="id">The encoded ID.</param>
 	/// <returns>
-	/// An array of integers containing the decoded number(s) (it would contain only one element
+	/// An array of long integers containing the decoded number(s) (it would contain only one element
 	/// if the ID represents a single number); or an empty array if the input ID is null,
 	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
-	public int[] Decode(string id) => Decode(id.AsSpan());
+	public long[] Decode(string id) => Decode(id.AsSpan());
 #endif
 
 	private bool IsBlockedId(ReadOnlySpan<char> id)
@@ -324,23 +324,23 @@ public sealed class SqidsEncoder
 		}
 	}
 
-	private static ReadOnlySpan<char> ToId(int num, ReadOnlySpan<char> alphabet)
+	private static ReadOnlySpan<char> ToId(long num, ReadOnlySpan<char> alphabet)
 	{
 		var id = new StringBuilder();
-		int result = num;
+		long result = num;
 
 		do
 		{
-			id.Insert(0, alphabet[result % alphabet.Length]);
+			id.Insert(0, alphabet[(int)(result % alphabet.Length)]);
 			result = result / alphabet.Length;
 		} while (result > 0);
 
 		return id.ToString().AsSpan(); // TODO: possibly avoid creating a string
 	}
 
-	private static int ToNumber(ReadOnlySpan<char> id, ReadOnlySpan<char> alphabet)
+	private static long ToNumber(ReadOnlySpan<char> id, ReadOnlySpan<char> alphabet)
 	{
-		int result = 0;
+		long result = 0;
 		foreach (var character in id)
 			result = result * alphabet.Length + alphabet.IndexOf(character);
 		return result;
