@@ -160,23 +160,11 @@ public sealed class SqidsEncoder
 
 		if (result.Length < _minLength)
 		{
-			if (!partitioned)
-			{
-				Span<int> newNumbers = (numbers.Length + 1) * sizeof(int) > MaxStackallocSize
-					? new int[numbers.Length + 1]
-					: stackalloc int[numbers.Length + 1];
-				newNumbers[0] = 0;
-				numbers.CopyTo(newNumbers[1..]);
-				result = Encode(newNumbers, partitioned: true);
-			}
-
-			if (result.Length < _minLength)
-			{
-				var leftToMeetMinLength = _minLength - result.Length;
-				var paddingFromAlphabet = alphabetTemp[..leftToMeetMinLength];
-				builder.Insert(1, paddingFromAlphabet);
-				result = builder.ToString();
-			}
+			builder.Insert(1, partition);
+			var leftToMeetMinLength = _minLength - builder.Length;
+			if (leftToMeetMinLength > 0)
+				builder.Insert(1, alphabetTemp[..leftToMeetMinLength]);
+			result = builder.ToString();
 		}
 
 		if (IsBlockedId(result.AsSpan()))
@@ -242,11 +230,7 @@ public sealed class SqidsEncoder
 		id = id[1..];
 
 		int partitionIndex = id.IndexOf(partition);
-		if (partitionIndex > 0 && partitionIndex < id.Length - 1)
-		{
-			id = id[(partitionIndex + 1)..];
-			ConsistentShuffle(alphabetTemp);
-		}
+		id = id[(partitionIndex + 1)..];
 
 		var result = new List<int>();
 
