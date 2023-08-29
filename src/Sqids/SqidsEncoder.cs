@@ -6,7 +6,7 @@ namespace Sqids;
 /// The Sqids encoder/decoder. This is the main class.
 /// </summary>
 public sealed class SqidsEncoder<T>
-	where T : IMinMaxValue<T>, IBinaryInteger<T>
+	where T : unmanaged, IMinMaxValue<T>, IBinaryInteger<T>
 {
 	private const int MinAlphabetLength = 5;
 	private const int MaxStackallocSize = 256; // NOTE: In bytes — this value is essentially arbitrary, the Microsoft docs is using 1024 but recommends being more conservative when choosing the value (https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/stackalloc), Hashids apparently uses 512 (https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/src/Hashids.net/Hashids.cs#L17), and this article (https://vcsjones.dev/stackalloc/) uses 256. I've tried to be pretty cautious and gone with a low value.
@@ -84,7 +84,7 @@ public sealed class SqidsEncoder<T>
 		if (number < MinValue || number > MaxValue)
 			throw new ArgumentOutOfRangeException($"Encoding supports numbers between '{MinValue}' and '{MaxValue}'.");
 
-		return Encode(new [] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
+		return Encode(stackalloc [] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
 	}
 
 	/// <summary>
@@ -165,7 +165,9 @@ public sealed class SqidsEncoder<T>
 		{
 			if (!partitioned)
 			{
-				Span<T> newNumbers = new T[numbers.Length + 1];
+				Span<T> newNumbers = (numbers.Length + 1) * sizeof(long) > MaxStackallocSize
+					? new T[numbers.Length + 1]
+					: stackalloc T[numbers.Length + 1];
 				newNumbers[0] = T.Zero;
 				numbers.CopyTo(newNumbers[1..]);
 				result = Encode(newNumbers, partitioned: true);
@@ -182,7 +184,9 @@ public sealed class SqidsEncoder<T>
 
 		if (IsBlockedId(result.AsSpan()))
 		{
-			Span<T> newNumbers = new T[numbers.Length];
+			Span<T> newNumbers = numbers.Length * sizeof(long) > MaxStackallocSize
+				? new T[numbers.Length]
+				: stackalloc T[numbers.Length];
 			numbers.CopyTo(newNumbers);
 
 			if (partitioned)
@@ -194,7 +198,9 @@ public sealed class SqidsEncoder<T>
 			}
 			else
 			{
-				newNumbers = new T[numbers.Length + 1];
+				newNumbers = (numbers.Length + 1) * sizeof(long) > MaxStackallocSize
+					? new T[numbers.Length + 1]
+					: stackalloc T[numbers.Length + 1];
 				newNumbers[0] = T.Zero;
 				numbers.CopyTo(newNumbers[1..]);
 			}
