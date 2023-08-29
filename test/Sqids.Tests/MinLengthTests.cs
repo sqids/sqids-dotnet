@@ -15,7 +15,7 @@ public class MinLengthTests
 	[TestCase(new[] { 0, 9 }, "94dRPIZ6irlXWvTbKywFuAhBoECQOVMjDJp53s2xeqaSzHY8nc17tmkLGwfGNl")]
 	public void EncodeAndDecode_WithMaximumMinLength_ReturnsExactMatch(int[] numbers, string id)
 	{
-		var sqids = new SqidsEncoder(new() { MinLength = new SqidsOptions().Alphabet.Length }); // NOTE: This is how we get the default alphabet
+		var sqids = new SqidsEncoder<int>(new() { MinLength = new SqidsOptions().Alphabet.Length }); // NOTE: This is how we get the default alphabet
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
@@ -27,7 +27,7 @@ public class MinLengthTests
 		[ValueSource(nameof(Numbers))] int[] numbers
 	)
 	{
-		var sqids = new SqidsEncoder(new() { MinLength = minLength });
+		var sqids = new SqidsEncoder<int>(new() { MinLength = minLength });
 
 		var id = sqids.Encode(numbers);
 		id.Length.ShouldBeGreaterThanOrEqualTo(minLength);
@@ -36,19 +36,19 @@ public class MinLengthTests
 	private static int[] MinLengths => new[] { 0, 1, 5, 10, new SqidsOptions().Alphabet.Length }; // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[Values]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
 	private static int[][] Numbers => new[]
 	{
-		new[] { SqidsEncoder.MinValue },
+		new[] { SqidsEncoder<int>.MinValue },
 		new[] { 0, 0, 0, 0, 0 },
 		new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 		new[] { 100, 200, 300 },
 		new[] { 1_000, 2_000, 3_000 },
 		new[] { 1_000_000 },
-		new[] { SqidsEncoder.MaxValue }
+		new[] { SqidsEncoder<int>.MaxValue }
 	};
 
 	[TestCaseSource(nameof(OutOfRangeMinLengths))]
 	public void Instantiate_WithOutOfRangeMinLength_Throws(int outOfRangeMinLength)
 	{
-		var a2 = () => new SqidsEncoder(new() { MinLength = outOfRangeMinLength });
+		var a2 = () => new SqidsEncoder<int>(new() { MinLength = outOfRangeMinLength });
 		a2.ShouldThrow<ArgumentException>();
 	}
 	private static int[] OutOfRangeMinLengths => new[] { -1, new SqidsOptions().Alphabet.Length + 1 }; // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[TestCase]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.

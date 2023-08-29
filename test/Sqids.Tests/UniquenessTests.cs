@@ -14,7 +14,7 @@ public class UniquenessTests
 	{
 		const int range = 1_000_000; // NOTE: We encode/decode one million numbers from `startingPoint`.
 
-		var sqids = new SqidsEncoder(new()
+		var sqids = new SqidsEncoder<int>(new()
 		{
 			MinLength = maxPadding ? new SqidsOptions().Alphabet.Length : 0,
 		});

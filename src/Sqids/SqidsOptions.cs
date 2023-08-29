@@ -1,7 +1,7 @@
 namespace Sqids;
 
 /// <summary>
-/// The configuration options for <see cref="SqidsEncoder" />.
+/// The configuration options for <see cref="SqidsEncoder{T}" />.
 /// All properties are optional; any property that isn't explicitly specified will fall back to its
 /// default value.
 /// </summary>

@@ -9,7 +9,7 @@ public class AlphabetTests
 		string id
 	)
 	{
-		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
+		var sqids = new SqidsEncoder<int>(new() { Alphabet = alphabet });
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
@@ -22,7 +22,7 @@ public class AlphabetTests
 		int[] numbers
 	)
 	{
-		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
+		var sqids = new SqidsEncoder<int>(new() { Alphabet = alphabet });
 
 		sqids.Decode(sqids.Encode(numbers)).ShouldBe(numbers);
 	}
@@ -31,7 +31,7 @@ public class AlphabetTests
 	[TestCase("abcd")] // NOTE: Too short
 	public void Instantiate_WithInvalidAlphabet_Throws(string invalidAlphabet)
 	{
-		var act = () => new SqidsEncoder(new() { Alphabet = invalidAlphabet });
+		var act = () => new SqidsEncoder<int>(new() { Alphabet = invalidAlphabet });
 		act.ShouldThrow<ArgumentException>();
 	}
 }

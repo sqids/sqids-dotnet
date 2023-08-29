@@ -15,7 +15,7 @@ public class EncodingTests
 	[TestCase(9, "n8")]
 	public void EncodeAndDecode_SingleNumber_ReturnsExactMatch(int number, string id)
 	{
-		var sqids = new SqidsEncoder();
+		var sqids = new SqidsEncoder<int>();
 
 		sqids.Encode(number).ShouldBe(id);
 		sqids.Decode(id).ShouldBeEquivalentTo(new[] { number });
@@ -49,35 +49,41 @@ public class EncodingTests
 	[TestCase(new int[] { }, "")]
 	public void EncodeAndDecode_MultipleNumbers_ReturnsExactMatch(int[] numbers, string id)
 	{
-		var sqids = new SqidsEncoder();
+		var sqids = new SqidsEncoder<int>();
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Encode(numbers.ToList()).ShouldBe(id); // NOTE: Selects the `IEnumerable<int>` overload
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
-	[TestCase(new[] {
-		0, 0, 0, 1, 2, 3, 100, 1_000, 100_000, 1_000_000, SqidsEncoder.MaxValue
-	})]
-	[TestCase(new[] {
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-		25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-		48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-		71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
-		94, 95, 96, 97, 98, 99
-	})]
-	public void EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully(int[] numbers)
+	[Test]
+	public void EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully([ValueSource(nameof(EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully_Values))] int[] numbers)
 	{
-		var sqids = new SqidsEncoder();
+		var sqids = new SqidsEncoder<int>();
 
 		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
 	}
+
+	private static int[][] EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully_Values = new[]
+	{
+		new[]
+		{
+			0, 0, 0, 1, 2, 3, 100, 1_000, 100_000, 1_000_000, SqidsEncoder<int>.MaxValue
+		},
+		new[] {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+			25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+			48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+			71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
+			94, 95, 96, 97, 98, 99
+		}
+	};
 
 	[TestCase("*")] // NOTE: Character not found in the alphabet
 	[TestCase("fff")] // NOTE: Repeating reserved character
 	public void Decode_WithInvalidCharacters_ReturnsEmptyArray(string id)
 	{
-		var sqids = new SqidsEncoder();
+		var sqids = new SqidsEncoder<int>();
 
 		sqids.Decode(id).ShouldBeEmpty();
 	}
@@ -85,8 +91,8 @@ public class EncodingTests
 	[Test]
 	public void Encode_OutOfRangeNumber_Throws()
 	{
-		var sqids = new SqidsEncoder();
-		var act = () => sqids.Encode(SqidsEncoder.MinValue - 1);
+		var sqids = new SqidsEncoder<int>();
+		var act = () => sqids.Encode(SqidsEncoder<int>.MinValue - 1);
 		act.ShouldThrow<ArgumentOutOfRangeException>();
 		// NOTE: We don't check for `MaxValue + 1` because that's a compile time error anyway
 	}

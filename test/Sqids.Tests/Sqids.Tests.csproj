@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<!-- NOTE: `net472` is used for testing `netstandard2.0` -->
-		<TargetFrameworks>net472;net6.0;net7.0</TargetFrameworks>
+		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>11.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
