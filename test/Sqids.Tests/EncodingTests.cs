@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Sqids.Tests;
 
 public class EncodingTests
@@ -124,4 +126,45 @@ public class EncodingTests
 		act.ShouldThrow<ArgumentOutOfRangeException>();
 		// NOTE: We don't check for `MaxValue + 1` because that's a compile time error anyway
 	}
+
+#if NET7_0_OR_GREATER
+	[TestCase(byte.MaxValue)]
+	[TestCase(sbyte.MaxValue)]
+	[TestCase(int.MaxValue)]
+	[TestCase(uint.MaxValue)]
+	[TestCase(long.MaxValue)]
+	[TestCase(ulong.MaxValue)]
+	public void Encode_DiffrentIntegerTypes_SingleNumber_RoundTripSuccessfully<T>(T number)
+		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
+	{
+		var sqids = new SqidsEncoder<T>();
+		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(new [] { number } );
+	}
+
+	[Test]
+	[TestCaseSource(nameof(Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully_TestCases))]
+	public void Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully<T>(T[] number)
+		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
+	{
+		var sqids = new SqidsEncoder<T>();
+		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(number);
+	}
+
+	private static IEnumerable<TestCaseData> Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully_TestCases()
+	{
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<byte>());
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<sbyte>());
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<int>());
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<uint>());
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<long>());
+		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<ulong>());
+	}
+
+	private static T[] Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<T>()
+		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
+	{
+		T part = T.MaxValue / T.CreateChecked(10);
+		return Enumerable.Range(0, 10).Select(x => T.CreateChecked(x) * part).Append(T.MaxValue).ToArray();
+	}
+#endif
 }
