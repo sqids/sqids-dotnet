@@ -33,6 +33,7 @@
 -   🔢 **Multiple Numbers:** You can bundle more than one number into one string, and then decode the string back to the same set of numbers.
 -   👁 **"Eye-safe":** Sqids makes sure that the IDs it generates do not contain common profanity, so you can safely use these IDs where end-users can see them (e.g. in URLs).
 -   🤹‍♀️ **Randomized Output:** Encoding sequential numbers (1, 2, 3...) yields completely different-looking IDs.
+-   💪 **Supports All Integral Types:** Powered by .NET 7's [generic math](https://learn.microsoft.com/en-us/dotnet/standard/generics/math) — you could use Sqids to encode/decode numbers of any integral numeric type in .NET, including `int`, `long`, `ulong`, `byte`, etc.
 -   ⚡ **Blazingly Fast:** With an optimized span-based implementation that minimizes memory allocation and maximizes performance.
 -   ✅ **Meticulously Tested:** Sqids has a comprehensive test suite that covers numerous edge cases, so you can expect a bug-free experience.
 
@@ -54,10 +55,21 @@ dotnet add package Sqids
 
 All you need is an instance of `SqidsEncoder`, which is the main class, responsible for both encoding and decoding.
 
-Using the default parameterless constructor configures `SqidsEncoder` with the default options:
+Using the default parameterless constructor configures `SqidsEncoder` with the default options.
+
+If you're using .NET 7 or greater, you need to specify the numeric type for the encoder — most commonly `int`:
 
 ```csharp
 using Sqids;
+var sqids = new SqidsEncoder<int>();
+```
+
+> **Note**
+> You can use any [integral numeric type](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types) (e.g. `long`, `byte`, `short`, etc.) as the type argument. `int` is just the most common one, but if you need to encode/decode larger numbers, for example, you could use `long`/`ulong` instead.
+
+If you're targeting an older framework than .NET 7, `SqidsEncoder` only supports `int`, and there is no generic type parameter you need to supply, so just:
+
+```cs
 var sqids = new SqidsEncoder();
 ```
 
@@ -89,7 +101,7 @@ You can specify all the properties, and any you leave out will fall back to thei
 You can give Sqids your own custom (ideally shuffled) alphabet to use in the IDs:
 
 ```cs
-var sqids = new SqidsEncoder(new()
+var sqids = new SqidsEncoder<int>(new()
 {
     // This is a shuffled version of the default alphabet, which includes lowercase letters (a-z), uppercase letters (A-Z), and digits (0-9)
     Alphabet = "mTHivO7hx3RAbr1f586SwjNnK2lgpcUVuG09BCtekZdJ4DYFPaWoMLQEsXIqyz",
@@ -104,7 +116,7 @@ var sqids = new SqidsEncoder(new()
 By default, Sqids uses as few characters as possible to encode a given number. However, if you want all your IDs to be at least a certain length (e.g. for aesthetic reasons), you can configure this via the `MinLength` option:
 
 ```cs
-var sqids = new SqidsEncoder(new()
+var sqids = new SqidsEncoder<int>(new()
 {
     MinLength = 5,
 });
@@ -116,7 +128,7 @@ Sqids comes with a large default blocklist which will ensure that common cruse w
 You can add extra items to this default blocklist like so:
 
 ```cs
-var sqids = new SqidsEncoder(new()
+var sqids = new SqidsEncoder<int>(new()
 {
     BlockList = { "whatever", "else", "you", "want" },
 });
@@ -169,13 +181,13 @@ To use `SqidsEncoder` with a dependency injection system, simply register it as 
 With default options:
 
 ```cs
-services.AddSingleton<SqidsEncoder>();
+services.AddSingleton<SqidsEncoder<int>>();
 ```
 
 With custom options:
 
 ```cs
-services.AddSingleton(new SqidsEncoder(new()
+services.AddSingleton(new SqidsEncoder<int>(new()
 {
     Alphabet = "ABCEDFGHIJ0123456789",
     MinLength = 6,
@@ -187,8 +199,8 @@ And then you can inject it anywhere you need it:
 ```cs
 public class SomeController
 {
-    private readonly SqidsEncoder _sqids;
-    public SomeController(SqidsEncoder sqids)
+    private readonly SqidsEncoder<int> _sqids;
+    public SomeController(SqidsEncoder<int> sqids)
     {
         _sqids = sqids;
     }
