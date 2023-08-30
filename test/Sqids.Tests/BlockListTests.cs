@@ -122,4 +122,24 @@ public class BlockListTests
 
 		sqids.Decode(sqids.Encode(1000)).ShouldBeEquivalentTo(new[] { 1000 });
 	}
+
+	[Test]
+	public void EncodeAndDecode_WithLowerCaseBlockListAndUpperCaseAlphabet_IgnoresCasing()
+	{
+#if NET7_0_OR_GREATER
+		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
+		{
+			Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			BlockList = new()
+			{
+				"sqnmpn", // NOTE: The uppercase version of this is the default encoding of [1,2,3]
+			},
+		});
+
+		sqids.Encode(1, 2, 3).ShouldBe("ULPBZGBM"); // NOTE: Without the blocklist, would've been "SQNMPN".
+		sqids.Decode("ULPBZGBM").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+	}
 }
