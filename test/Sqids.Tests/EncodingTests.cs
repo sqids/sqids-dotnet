@@ -1,4 +1,6 @@
+#if NET7_0_OR_GREATER
 using System.Numerics;
+#endif
 
 namespace Sqids.Tests;
 
