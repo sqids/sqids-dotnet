@@ -68,8 +68,8 @@ public class EncodingTests
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
-	[Test]
-	public void EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully([ValueSource(nameof(EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully_Values))] int[] numbers)
+	[TestCaseSource(nameof(MultipleNumbersTestCaseSource))]
+	public void EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully(int[] numbers)
 	{
 #if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>();
@@ -80,7 +80,7 @@ public class EncodingTests
 		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
 	}
 
-	private static int[][] EncodeAndDecode_MultipleNumbers_RoundTripsSuccessfully_Values = new[]
+	private static int[][] MultipleNumbersTestCaseSource => new[]
 	{
 #if NET7_0_OR_GREATER
 		new[]
@@ -134,39 +134,47 @@ public class EncodingTests
 	[TestCase(sbyte.MaxValue)]
 	[TestCase(int.MaxValue)]
 	[TestCase(uint.MaxValue)]
+	[TestCase(short.MaxValue)]
+	[TestCase(ushort.MaxValue)]
 	[TestCase(long.MaxValue)]
 	[TestCase(ulong.MaxValue)]
-	public void Encode_DiffrentIntegerTypes_SingleNumber_RoundTripSuccessfully<T>(T number)
-		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
+	public void EncodeAndDecode_SingleNumberOfDifferentIntegerTypes_RoundTripsSuccessfully<T>(
+		T number
+	) where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 	{
 		var sqids = new SqidsEncoder<T>();
-		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(new [] { number } );
+		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(new[] { number });
 	}
 
-	[Test]
-	[TestCaseSource(nameof(Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully_TestCases))]
-	public void Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully<T>(T[] number)
-		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
+	[TestCaseSource(nameof(MultipleNumbersOfDifferentIntegerTypesTestCaseSource))]
+	public void EncodeAndDecode_MultipleNumbersOfDifferentIntegerTypes_RoundTripsSuccessfully<T>(
+		T[] numbers
+	) where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 	{
 		var sqids = new SqidsEncoder<T>();
-		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(number);
+		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
 	}
 
-	private static IEnumerable<TestCaseData> Encode_DiffrentIntegerTypes_MultipleNumbers_RoundTripSuccessfully_TestCases()
+	private static TestCaseData[] MultipleNumbersOfDifferentIntegerTypesTestCaseSource => new[]
 	{
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<byte>());
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<sbyte>());
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<int>());
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<uint>());
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<long>());
-		yield return new TestCaseData(Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<ulong>());
-	}
+		new TestCaseData(GenerateMultipleNumbersOfType<byte>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<sbyte>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<int>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<uint>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<short>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<ushort>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<long>()),
+		new TestCaseData(GenerateMultipleNumbersOfType<ulong>()),
+	};
 
-	private static T[] Generate_DiffrentIntegerTypes_MultipleNumbers_TestCaseValues<T>()
+	private static T[] GenerateMultipleNumbersOfType<T>()
 		where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 	{
 		T part = T.MaxValue / T.CreateChecked(10);
-		return Enumerable.Range(0, 10).Select(x => T.CreateChecked(x) * part).Append(T.MaxValue).ToArray();
+		return Enumerable.Range(0, 5)
+			.Select(x => T.CreateChecked(x) * part)
+			.Append(T.MaxValue)
+			.ToArray();
 	}
 #endif
 }

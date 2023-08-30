@@ -27,8 +27,8 @@ public class MinLengthTests
 
 	[Test, Combinatorial]
 	public void EncodeAndDecode_WithDifferentMinLengths_RespectsMinLengthAndRoundTripsSuccessfully(
-		[ValueSource(nameof(MinLengths))] int minLength,
-		[ValueSource(nameof(Numbers))] int[] numbers
+		[ValueSource(nameof(MinLengthsValueSource))] int minLength,
+		[ValueSource(nameof(NumbersValueSource))] int[] numbers
 	)
 	{
 #if NET7_0_OR_GREATER
@@ -41,8 +41,11 @@ public class MinLengthTests
 		id.Length.ShouldBeGreaterThanOrEqualTo(minLength);
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
-	private static int[] MinLengths => new[] { 0, 1, 5, 10, new SqidsOptions().Alphabet.Length }; // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[Values]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
-	private static int[][] Numbers => new[]
+	private static int[] MinLengthsValueSource => new[]
+	{
+		0, 1, 5, 10, new SqidsOptions().Alphabet.Length  // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[Values]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
+	};
+	private static int[][] NumbersValueSource => new[]
 	{
 #if NET7_0_OR_GREATER
 		new[] { SqidsEncoder<int>.MinValue },
@@ -61,15 +64,18 @@ public class MinLengthTests
 #endif
 	};
 
-	[TestCaseSource(nameof(OutOfRangeMinLengths))]
+	[TestCaseSource(nameof(OutOfRangeMinLengthsTestCaseSource))]
 	public void Instantiate_WithOutOfRangeMinLength_Throws(int outOfRangeMinLength)
 	{
 #if NET7_0_OR_GREATER
-		var a2 = () => new SqidsEncoder<int>(new() { MinLength = outOfRangeMinLength });
+		var act = () => new SqidsEncoder<int>(new() { MinLength = outOfRangeMinLength });
 #else
-		var a2 = () => new SqidsEncoder(new() { MinLength = outOfRangeMinLength });
+		var act = () => new SqidsEncoder(new() { MinLength = outOfRangeMinLength });
 #endif
-		a2.ShouldThrow<ArgumentException>();
+		act.ShouldThrow<ArgumentException>();
 	}
-	private static int[] OutOfRangeMinLengths => new[] { -1, new SqidsOptions().Alphabet.Length + 1 }; // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[TestCase]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
+	private static int[] OutOfRangeMinLengthsTestCaseSource => new[]
+	{
+		-1, new SqidsOptions().Alphabet.Length + 1   // NOTE: We can't use `new SqidsOptions().Alphabet.Length` in the `[TestCase]` attribute since only constants are allowed for attribute arguments; so we have to use a value source like this.
+	};
 }

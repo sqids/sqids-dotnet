@@ -4,13 +4,20 @@ using System.Numerics;
 
 namespace Sqids;
 
+#if NET7_0_OR_GREATER
 /// <summary>
 /// The Sqids encoder/decoder. This is the main class.
 /// </summary>
-#if NET7_0_OR_GREATER
-public sealed class SqidsEncoder<T>
-	where T : unmanaged, IMinMaxValue<T>, IBinaryInteger<T>
+/// <typeparam name="T">
+/// The integral numeric type that will be encoded/decoded.
+/// Could be one of `int`, `long`, `byte`, `short`, and others. For the full list, check out
+/// https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
+/// </typeparam>
+public sealed class SqidsEncoder<T> where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 #else
+/// <summary>
+/// The Sqids encoder/decoder. This is the main class.
+/// </summary>
 public sealed class SqidsEncoder
 #endif
 {
@@ -38,13 +45,13 @@ public sealed class SqidsEncoder
 #if NET7_0_OR_GREATER
 	/// <summary>
 	/// The maximum numeric value that can be encoded/decoded using <see cref="SqidsEncoder{T}" />.
-	/// It's equal to `int.MaxValue`.
+	/// This is equal to `T.MaxValue`.
 	/// </summary>
 	public static T MaxValue => T.MaxValue;
 #else
 	/// <summary>
 	/// The maximum numeric value that can be encoded/decoded using <see cref="SqidsEncoder" />.
-	/// It's equal to `int.MaxValue`.
+	/// This is equal to `int.MaxValue`.
 	/// </summary>
 	public const int MaxValue = int.MaxValue;
 #endif
@@ -108,7 +115,8 @@ public sealed class SqidsEncoder
 		);
 		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
-		Span<char> shuffledAlphabet = options.Alphabet.Length * sizeof(char) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
+		// TODO: `sizeof(T)` doesn't work, so we resorted to `sizeof(long)`, but ideally we should get it to work somehow — see https://github.com/sqids/sqids-dotnet/pull/15#issue-1872663234
+		Span<char> shuffledAlphabet = options.Alphabet.Length * sizeof(long) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
 			? new char[options.Alphabet.Length]
 			: stackalloc char[options.Alphabet.Length];
 		options.Alphabet.AsSpan().CopyTo(shuffledAlphabet);
@@ -204,13 +212,7 @@ public sealed class SqidsEncoder
 
 		for (int i = 0; i < numbers.Length; i++)
 		{
-#if NET7_0_OR_GREATER
-			T number = numbers[i];
-#else
-			int number = numbers[i];
-#endif
-
-
+			var number = numbers[i];
 			var alphabetWithoutSeparator = alphabetTemp[..^1];
 			var encodedNumber = ToId(number, alphabetWithoutSeparator);
 			builder.Append(encodedNumber);
@@ -365,14 +367,11 @@ public sealed class SqidsEncoder
 			ConsistentShuffle(alphabetTemp);
 		}
 
-
-
 #if NET7_0_OR_GREATER
 		var result = new List<T>();
 #else
 		var result = new List<int>();
 #endif
-
 		while (!id.IsEmpty)
 		{
 			char separator = alphabetTemp[^1];
@@ -458,11 +457,7 @@ public sealed class SqidsEncoder
 #endif
 	{
 		var id = new StringBuilder();
-#if NET7_0_OR_GREATER
-		T result = num;
-#else
-		int result = num;
-#endif
+		var result = num;
 
 #if NET7_0_OR_GREATER
 		do
