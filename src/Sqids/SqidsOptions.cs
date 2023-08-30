@@ -1,10 +1,18 @@
 namespace Sqids;
 
+#if NET7_0_OR_GREATER
 /// <summary>
 /// The configuration options for <see cref="SqidsEncoder{T}" />.
 /// All properties are optional; any property that isn't explicitly specified will fall back to its
 /// default value.
 /// </summary>
+#else
+/// <summary>
+/// The configuration options for <see cref="SqidsEncoder" />.
+/// All properties are optional; any property that isn't explicitly specified will fall back to its
+/// default value.
+/// </summary>
+#endif
 public sealed class SqidsOptions
 {
 	/// <summary>
