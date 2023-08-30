@@ -5,7 +5,11 @@ public class BlockListTests
 	[Test]
 	public void EncodeAndDecode_WithDefaultBlockList_BlocksWordsInDefaultBlockList()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>();
+#else
+		var sqids = new SqidsEncoder();
+#endif
 
 		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
 		sqids.Encode(200044).ShouldBe("d171vI");
@@ -14,7 +18,11 @@ public class BlockListTests
 	[Test]
 	public void EncodeAndDecode_WithEmptyBlockList_DoesNotBlockWords()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
 		{
 			BlockList = new(),
 		});
@@ -26,7 +34,11 @@ public class BlockListTests
 	[Test]
 	public void EncodeAndDecode_WithCustomBlockList_OnlyBlocksWordsInCustomBlockList()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
 		{
 			BlockList = new()
 			{
@@ -47,7 +59,11 @@ public class BlockListTests
 	[Test]
 	public void EncodeAndDecode_WithBlockListBlockingMultipleEncodings_RespectsBlockList()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
 		{
 			BlockList = new()
 			{
@@ -66,7 +82,11 @@ public class BlockListTests
 	[Test]
 	public void Decode_BlockedIds_StillDecodesSuccessfully()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
 		{
 			BlockList = new()
 			{
@@ -88,7 +108,11 @@ public class BlockListTests
 	[Test]
 	public void EncodeAndDecode_WithShortCustomBlockList_RoundTripsSuccessfully()
 	{
+#if NET7_0_OR_GREATER
 		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
 		{
 			BlockList = new()
 			{
