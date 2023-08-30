@@ -9,7 +9,12 @@ public class AlphabetTests
 		string id
 	)
 	{
+
+#if NET7_0_OR_GREATER
+		var sqids = new SqidsEncoder<int>(new() { Alphabet = alphabet });
+#else
 		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
+#endif
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
@@ -22,7 +27,12 @@ public class AlphabetTests
 		int[] numbers
 	)
 	{
+#if NET7_0_OR_GREATER
+		var sqids = new SqidsEncoder<int>(new() { Alphabet = alphabet });
+#else
 		var sqids = new SqidsEncoder(new() { Alphabet = alphabet });
+#endif
+
 
 		sqids.Decode(sqids.Encode(numbers)).ShouldBe(numbers);
 	}
@@ -31,7 +41,11 @@ public class AlphabetTests
 	[TestCase("abcd")] // NOTE: Too short
 	public void Instantiate_WithInvalidAlphabet_Throws(string invalidAlphabet)
 	{
+#if NET7_0_OR_GREATER
+		var act = () => new SqidsEncoder<int>(new() { Alphabet = invalidAlphabet });
+#else
 		var act = () => new SqidsEncoder(new() { Alphabet = invalidAlphabet });
+#endif
 		act.ShouldThrow<ArgumentException>();
 	}
 }
