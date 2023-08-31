@@ -109,7 +109,10 @@ var sqids = new SqidsEncoder<int>(new()
 ```
 
 > **Note**
-> It's recommended that you at least provide a shuffled alphabet when using Sqids — even if you want to use the same characters as those the default alphabet — so that your IDs will be unique to you.
+> It's recommended that you at least provide a shuffled alphabet when using Sqids — even if you want to use the same characters as those in the default alphabet — so that your IDs will be unique to you. You can use an online tool like [this one](https://codebeautify.org/shuffle-letters) to do that.
+
+> **Warning**
+> Sqids needs an alphabet that contains at least 5 unique characters.
 
 #### Minimum Length:
 
@@ -141,7 +144,7 @@ var sqids = new SqidsEncoder<int>(new()
 
 #### Decoding a single number:
 
-If you're decoding user-provided input and expect a single number, you can use C## pattern matching to do the necessary check and extract the number in one go:
+If you're decoding user-provided input and expect a single number, you can use C#'s pattern matching feature to do the necessary check and extract the number in one go:
 
 ```cs
 if (sqids.Decode(input) is [var singleNumber])
