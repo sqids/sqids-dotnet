@@ -2,7 +2,7 @@ namespace Sqids.Tests;
 
 public class AlphabetTests
 {
-	[TestCase("0123456789abcdef", new[] { 1, 2, 3 }, "4d9fd2")]
+	[TestCase("0123456789abcdef", new[] { 1, 2, 3 }, "489158")]
 	public void EncodeAndDecode_WithCustomAlphabet_ReturnsExactMatch(
 		string alphabet,
 		int[] numbers,
@@ -20,8 +20,8 @@ public class AlphabetTests
 		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
 	}
 
-	[TestCase("abcde", new[] { 1, 2, 3 })] // NOTE: Short alphabet
-	[TestCase("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~", new[] { 1, 2, 3 })] // NOTE: Long short
+	[TestCase("abc", new[] { 1, 2, 3 })] // NOTE: Shortest possible alphabet
+	[TestCase("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~", new[] { 1, 2, 3 })] // NOTE: Long alphabet
 	public void EncodeAndDecode_WithCustomAlphabet_RoundTripsSuccessfully(
 		string alphabet,
 		int[] numbers
@@ -38,7 +38,7 @@ public class AlphabetTests
 	}
 
 	[TestCase("aabcdefg")] // NOTE: Repeated characters
-	[TestCase("abcd")] // NOTE: Too short
+	[TestCase("ab")] // NOTE: Too short
 	public void Instantiate_WithInvalidAlphabet_Throws(string invalidAlphabet)
 	{
 #if NET7_0_OR_GREATER
@@ -46,6 +46,6 @@ public class AlphabetTests
 #else
 		var act = () => new SqidsEncoder(new() { Alphabet = invalidAlphabet });
 #endif
-		act.ShouldThrow<ArgumentException>();
+		act.ShouldThrow<ArgumentOutOfRangeException>();
 	}
 }

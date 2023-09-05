@@ -31,7 +31,7 @@ public sealed class SqidsOptions
 	/// <summary>
 	/// List of blocked words that must not appear in the IDs.
 	/// </summary>
-	public HashSet<string> BlockList { get; set; } = new() // todo: should this be a hash set? we don't do lookups on it, we merely iterate over it
+	public HashSet<string> BlockList { get; set; } = new()
 	{
 		"0rgasm",
 		"1d10t",

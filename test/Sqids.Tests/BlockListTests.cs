@@ -11,8 +11,8 @@ public class BlockListTests
 		var sqids = new SqidsEncoder();
 #endif
 
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).ShouldBe("d171vI");
+		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Encode(4572721).ShouldBe("JExTR");
 	}
 
 	[Test]
@@ -27,8 +27,8 @@ public class BlockListTests
 			BlockList = new(),
 		});
 
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).ShouldBe("sexy");
+		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Encode(4572721).ShouldBe("aho1e");
 	}
 
 	[Test]
@@ -42,18 +42,18 @@ public class BlockListTests
 		{
 			BlockList = new()
 			{
-				"AvTg" // NOTE: The default encoding of 100000.
+				"ArUO" // NOTE: The default encoding of 100000.
 			},
 		});
 
 		// NOTE: Make sure the default blocklist isn't used
-		sqids.Decode("sexy").ShouldBeEquivalentTo(new[] { 200044 });
-		sqids.Encode(200044).ShouldBe("sexy");
+		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Encode(4572721).ShouldBe("aho1e");
 
 		// NOTE: Make sure the passed blocklist IS used:
-		sqids.Decode("AvTg").ShouldBeEquivalentTo(new[] { 100000 });
-		sqids.Encode(100000).ShouldBe("7T1X8k");
-		sqids.Decode("7T1X8k").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Decode("ArUO").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Encode(100000).ShouldBe("QyG4");
+		sqids.Decode("QyG4").ShouldBeEquivalentTo(new[] { 100000 });
 	}
 
 	[Test]
@@ -67,16 +67,16 @@ public class BlockListTests
 		{
 			BlockList = new()
 			{
-				"8QRLaD", // normal result of 1st encoding, let's block that word on purpose
-				"7T1cd0dL", // result of 2nd encoding
-				"UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
-				"imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
-				"LfUQ", // result of 4th encoding is `LfUQh4HN`, let's block the prefix
+				"JSwXFaosAN", // normal result of 1st encoding, let's block that word on purpose
+				"OCjV9JK64o", // result of 2nd encoding
+				"rBHf", // result of 3rd encoding is `4rBHfOiqd3`, let's block a substring
+				"79SM", // result of 4th encoding is `dyhgw479SM`, let's block the postfix
+				"7tE6", // result of 4th encoding is `7tE6jdAHLe`, let's block the prefix
 			},
 		});
 
-		sqids.Encode(1, 2, 3).ShouldBe("TM0x1Mxz");
-		sqids.Decode("TM0x1Mxz").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Encode(1_000_000, 2_000_000).ShouldBe("1aYeB7bRUt");
+		sqids.Decode("1aYeB7bRUt").ShouldBeEquivalentTo(new[] { 1_000_000, 2_000_000 });
 	}
 
 	[Test]
@@ -90,19 +90,19 @@ public class BlockListTests
 		{
 			BlockList = new()
 			{
-				"8QRLaD",
-				"7T1cd0dL",
-				"RA8UeIe7",
-				"WM3Limhw",
-				"LfUQh4HN",
+				"86Rf07",
+				"se8ojk",
+				"ARsz1p",
+				"Q8AI49",
+				"5sQRZO",
 			},
 		});
 
-		sqids.Decode("8QRLaD").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("7T1cd0dL").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("RA8UeIe7").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("WM3Limhw").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("LfUQh4HN").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("86Rf07").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("se8ojk").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("ARsz1p").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("Q8AI49").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("5sQRZO").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
 	}
 
 	[Test]
@@ -116,7 +116,7 @@ public class BlockListTests
 		{
 			BlockList = new()
 			{
-				"pPQ", // NOTE: This is the default encoding of `1000`.
+				"pnd", // NOTE: This is the default encoding of `1000` — and blocklist words with three characters are the shortest possible
 			},
 		});
 
@@ -135,11 +135,11 @@ public class BlockListTests
 			Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 			BlockList = new()
 			{
-				"sqnmpn", // NOTE: The uppercase version of this is the default encoding of [1,2,3]
+				"sxnzkl", // NOTE: The uppercase version of this is the default encoding of [1,2,3]
 			},
 		});
 
-		sqids.Encode(1, 2, 3).ShouldBe("ULPBZGBM"); // NOTE: Without the blocklist, would've been "SQNMPN".
-		sqids.Decode("ULPBZGBM").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Encode(1, 2, 3).ShouldBe("IBSHOZ"); // NOTE: Without the blocklist, would've been "SQNMPN".
+		sqids.Decode("IBSHOZ").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
 	}
 }
