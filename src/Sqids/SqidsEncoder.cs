@@ -269,9 +269,9 @@ public sealed class SqidsEncoder
 	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
 #if NET7_0_OR_GREATER
-	public T[] Decode(ReadOnlySpan<char> id)
+	public IReadOnlyList<T> Decode(ReadOnlySpan<char> id)
 #else
-	public int[] Decode(ReadOnlySpan<char> id)
+	public IReadOnlyList<int> Decode(ReadOnlySpan<char> id)
 #endif
 	{
 		if (id.IsEmpty)
@@ -318,7 +318,7 @@ public sealed class SqidsEncoder
 			id = separatorIndex == -1 ? default : id[(separatorIndex + 1)..]; // NOTE: Everything to the right of the separator will be `id` for the next iteration
 
 			if (chunk.IsEmpty)
-				return result.ToArray();
+				return result;
 
 			var alphabetWithoutSeparator = alphabetTemp[1..]; // NOTE: Exclude the first character — which is the separator
 			var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
@@ -328,7 +328,7 @@ public sealed class SqidsEncoder
 				ConsistentShuffle(alphabetTemp);
 		}
 
-		return result.ToArray(); // TODO: A way to return an array without creating a new array from the list like this?
+		return result;
 	}
 
 	// NOTE: Implicit `string` => `Span<char>` conversion was introduced in .NET Standard 2.1 (see https://learn.microsoft.com/en-us/dotnet/api/system.string.op_implicit), which means without this overload, calling `Decode` with a string on versions older than .NET Standard 2.1 would require calling `.AsSpan()` on the string, which is cringe.
@@ -342,7 +342,7 @@ public sealed class SqidsEncoder
 	/// if the ID represents a single number); or an empty array if the input ID is null,
 	/// empty, or includes characters not found in the alphabet.
 	/// </returns>
-	public int[] Decode(string id) => Decode(id.AsSpan());
+	public IReadOnlyList<int> Decode(string id) => Decode(id.AsSpan());
 #endif
 
 	private bool IsBlockedId(ReadOnlySpan<char> id)
