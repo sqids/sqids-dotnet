@@ -22,7 +22,6 @@ public sealed class SqidsEncoder
 #endif
 {
 	private const int MinAlphabetLength = 3;
-	private const int MaxMinLength = 1_000;
 	private const int MaxStackallocSize = 256; // NOTE: In bytes — this value is essentially arbitrary, the Microsoft docs is using 1024 but recommends being more conservative when choosing the value (https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/stackalloc), Hashids apparently uses 512 (https://github.com/ullmark/hashids.net/blob/9b1c69de4eedddf9d352c96117d8122af202e90f/src/Hashids.net/Hashids.cs#L17), and this article (https://vcsjones.dev/stackalloc/) uses 256. I've tried to be pretty cautious and gone with a low value.
 
 	private readonly char[] _alphabet;
@@ -69,22 +68,16 @@ public sealed class SqidsEncoder
 		ArgumentNullException.ThrowIfNull(options.Alphabet);
 		ArgumentNullException.ThrowIfNull(options.BlockList);
 
-		if (options.Alphabet.Length < MinAlphabetLength)
-			throw new ArgumentOutOfRangeException(
-				nameof(options.Alphabet),
-				"The alphabet must contain at least 5 characters."
-			);
-
 		if (options.Alphabet.Distinct().Count() != options.Alphabet.Length)
 			throw new ArgumentOutOfRangeException(
 				nameof(options.MinLength),
 				"The alphabet must not contain duplicate characters."
 			);
 
-		if (options.MinLength < 0 || options.MinLength > MaxMinLength)
+		if (options.Alphabet.Length < MinAlphabetLength)
 			throw new ArgumentOutOfRangeException(
-				nameof(options.MinLength),
-				$"The minimum length must be between 0 and {MaxMinLength}."
+				nameof(options.Alphabet),
+				$"The alphabet must contain at least {MinAlphabetLength} characters."
 			);
 
 		_minLength = options.MinLength;
