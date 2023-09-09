@@ -11,7 +11,7 @@ public class BlockListTests
 		var sqids = new SqidsEncoder();
 #endif
 
-		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Decode("aho1e").ShouldBe(new[] { 4572721 });
 		sqids.Encode(4572721).ShouldBe("JExTR");
 	}
 
@@ -27,7 +27,7 @@ public class BlockListTests
 			BlockList = new(),
 		});
 
-		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Decode("aho1e").ShouldBe(new[] { 4572721 });
 		sqids.Encode(4572721).ShouldBe("aho1e");
 	}
 
@@ -47,13 +47,13 @@ public class BlockListTests
 		});
 
 		// NOTE: Make sure the default blocklist isn't used
-		sqids.Decode("aho1e").ShouldBeEquivalentTo(new[] { 4572721 });
+		sqids.Decode("aho1e").ShouldBe(new[] { 4572721 });
 		sqids.Encode(4572721).ShouldBe("aho1e");
 
 		// NOTE: Make sure the passed blocklist IS used:
-		sqids.Decode("ArUO").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Decode("ArUO").ShouldBe(new[] { 100000 });
 		sqids.Encode(100000).ShouldBe("QyG4");
-		sqids.Decode("QyG4").ShouldBeEquivalentTo(new[] { 100000 });
+		sqids.Decode("QyG4").ShouldBe(new[] { 100000 });
 	}
 
 	[Test]
@@ -76,7 +76,7 @@ public class BlockListTests
 		});
 
 		sqids.Encode(1_000_000, 2_000_000).ShouldBe("1aYeB7bRUt");
-		sqids.Decode("1aYeB7bRUt").ShouldBeEquivalentTo(new[] { 1_000_000, 2_000_000 });
+		sqids.Decode("1aYeB7bRUt").ShouldBe(new[] { 1_000_000, 2_000_000 });
 	}
 
 	[Test]
@@ -98,11 +98,11 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Decode("86Rf07").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("se8ojk").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("ARsz1p").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("Q8AI49").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
-		sqids.Decode("5sQRZO").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("86Rf07").ShouldBe(new[] { 1, 2, 3 });
+		sqids.Decode("se8ojk").ShouldBe(new[] { 1, 2, 3 });
+		sqids.Decode("ARsz1p").ShouldBe(new[] { 1, 2, 3 });
+		sqids.Decode("Q8AI49").ShouldBe(new[] { 1, 2, 3 });
+		sqids.Decode("5sQRZO").ShouldBe(new[] { 1, 2, 3 });
 	}
 
 	[Test]
@@ -120,7 +120,7 @@ public class BlockListTests
 			},
 		});
 
-		sqids.Decode(sqids.Encode(1000)).ShouldBeEquivalentTo(new[] { 1000 });
+		sqids.Decode(sqids.Encode(1000)).ShouldBe(new[] { 1000 });
 	}
 
 	[Test]
@@ -140,7 +140,7 @@ public class BlockListTests
 		});
 
 		sqids.Encode(1, 2, 3).ShouldBe("IBSHOZ"); // NOTE: Without the blocklist, would've been "SQNMPN".
-		sqids.Decode("IBSHOZ").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
+		sqids.Decode("IBSHOZ").ShouldBe(new[] { 1, 2, 3 });
 	}
 
 	[Test]

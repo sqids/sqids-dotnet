@@ -17,7 +17,7 @@ public class AlphabetTests
 #endif
 
 		sqids.Encode(numbers).ShouldBe(id);
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBe(numbers);
 	}
 
 	[TestCase("abc", new[] { 1, 2, 3 })] // NOTE: Shortest possible alphabet

@@ -25,7 +25,7 @@ public class MinLengthTests
 		});
 
 		sqids.Encode(numbers).ShouldBe(id);
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBe(numbers);
 	}
 
 	[TestCaseSource(nameof(IncrementalMinLengthsSource))]
@@ -47,7 +47,7 @@ public class MinLengthTests
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Encode(numbers).Length.ShouldBeGreaterThanOrEqualTo(minLength);
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBe(numbers);
 	}
 	private static TestCaseData[] IncrementalMinLengthsSource => new TestCaseData[]
 	{
@@ -100,7 +100,7 @@ public class MinLengthTests
 
 		var id = sqids.Encode(numbers);
 		id.Length.ShouldBeGreaterThanOrEqualTo(minLength);
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBe(numbers);
 	}
 	private static int[] MinLengthsValueSource => new[]
 	{
