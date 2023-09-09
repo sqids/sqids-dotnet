@@ -64,9 +64,9 @@ public sealed class SqidsEncoder
 #endif
 	public SqidsEncoder(SqidsOptions options)
 	{
-		ArgumentNullException.ThrowIfNull(options);
-		ArgumentNullException.ThrowIfNull(options.Alphabet);
-		ArgumentNullException.ThrowIfNull(options.BlockList);
+		_ = options ?? throw new ArgumentNullException(nameof(options));
+		_ = options.Alphabet ?? throw new ArgumentNullException(nameof(options.Alphabet));
+		_ = options.BlockList ?? throw new ArgumentNullException(nameof(options.BlockList));
 
 		if (options.Alphabet.Distinct().Count() != options.Alphabet.Length)
 			throw new ArgumentOutOfRangeException(
