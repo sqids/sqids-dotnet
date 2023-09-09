@@ -141,7 +141,7 @@ public sealed class SqidsEncoder
 #endif
 			throw new ArgumentOutOfRangeException(
 				nameof(number),
-				$"Encoding is only supported for zero and positive numbers."
+				"Encoding is only supported for zero and positive numbers."
 			);
 
 		return Encode(stackalloc[] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
@@ -170,7 +170,7 @@ public sealed class SqidsEncoder
 #endif
 			throw new ArgumentOutOfRangeException(
 				nameof(numbers),
-				$"Encoding is only supported for zero and positive numbers."
+				"Encoding is only supported for zero and positive numbers."
 			);
 
 		return Encode(numbers.AsSpan());

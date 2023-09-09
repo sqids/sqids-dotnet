@@ -108,7 +108,7 @@ public class MinLengthTests
 	};
 
 	[TestCase(-1)] // NOTE: Negative min lengths are not acceptable
-	[TestCase(1_001)] // NOTE: Max min length is 1000
+	[TestCase(256)] // NOTE: Max min length is 255
 	public void Instantiate_WithOutOfRangeMinLength_Throws(int outOfRangeMinLength)
 	{
 #if NET7_0_OR_GREATER
