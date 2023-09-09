@@ -75,6 +75,12 @@ public sealed class SqidsEncoder
 				"The alphabet must not contain duplicate characters."
 			);
 
+		if (Encoding.UTF8.GetByteCount(options.Alphabet) != options.Alphabet.Length)
+			throw new ArgumentOutOfRangeException(
+				nameof(options.MinLength),
+				"The alphabet must not contain multi-byte characters."
+			);
+
 		if (options.Alphabet.Length < MinAlphabetLength)
 			throw new ArgumentOutOfRangeException(
 				nameof(options.Alphabet),

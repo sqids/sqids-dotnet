@@ -39,6 +39,7 @@ public class AlphabetTests
 
 	[TestCase("aabcdefg")] // NOTE: Repeated characters
 	[TestCase("ab")] // NOTE: Too short
+	[TestCase("ë1092")] // NOTE: Contains a multi-byte character
 	public void Instantiate_WithInvalidAlphabet_Throws(string invalidAlphabet)
 	{
 #if NET7_0_OR_GREATER
