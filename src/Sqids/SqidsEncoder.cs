@@ -315,15 +315,6 @@ public sealed class SqidsEncoder
 				return result.ToArray();
 
 			var alphabetWithoutSeparator = alphabetTemp[1..]; // NOTE: Exclude the first character — which is the separator
-
-			foreach (char c in chunk)
-				if (!alphabetWithoutSeparator.Contains(c)) // todo: couldn't this be simplified to `if (chunk.Contains(separator))` and yield the same result in combination with the check at beginning of the method
-#if NET7_0_OR_GREATER
-					return Array.Empty<T>();
-#else
-					return Array.Empty<int>();
-#endif
-
 			var decodedNumber = ToNumber(chunk, alphabetWithoutSeparator);
 			result.Add(decodedNumber);
 

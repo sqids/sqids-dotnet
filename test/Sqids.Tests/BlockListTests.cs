@@ -142,4 +142,27 @@ public class BlockListTests
 		sqids.Encode(1, 2, 3).ShouldBe("IBSHOZ"); // NOTE: Without the blocklist, would've been "SQNMPN".
 		sqids.Decode("IBSHOZ").ShouldBeEquivalentTo(new[] { 1, 2, 3 });
 	}
+
+	[Test]
+	public void Encode_WithNumerousEncodingsBlocked_ThrowsExceptionForReachingMaxReEncodingAttempts()
+	{
+#if NET7_0_OR_GREATER
+		var sqids = new SqidsEncoder<int>(new()
+#else
+		var sqids = new SqidsEncoder(new()
+#endif
+		{
+			Alphabet = "abc",
+			MinLength = 3,
+			BlockList = new()
+			{
+				"cab",
+				"abc",
+				"bca",
+			},
+		});
+
+		var act = () => sqids.Encode(0);
+		act.ShouldThrow<ArgumentException>(); // TODO: It might be better if we actually check the exception messages too, to make sure it threw exactly the specific exception we expected.
+	}
 }
