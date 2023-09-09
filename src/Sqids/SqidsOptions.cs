@@ -25,9 +25,9 @@ public sealed class SqidsOptions
 	/// <summary>
 	/// The minimum length for the IDs.
 	/// The default is 0; meaning the IDs will be as short as possible.
-	/// 255 is the maximum; hence `byte` as the type.
+	/// 255 is the maximum.
 	/// </summary>
-	public byte MinLength { get; set; } = 0;
+	public int MinLength { get; set; } = 0;
 
 	/// <summary>
 	/// List of blocked words that must not appear in the IDs.
