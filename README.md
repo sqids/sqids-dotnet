@@ -76,14 +76,14 @@ var sqids = new SqidsEncoder();
 #### Single number:
 
 ```cs
-string id = sqids.Encode(1); // "UfB"
+string id = sqids.Encode(1); // "Uk"
 int number = sqids.Decode(id).Single(); // 1
 ```
 
 #### Multiple numbers:
 
 ```cs
-string id = sqids.Encode(1, 2, 3); // "8QRLaD"
+string id = sqids.Encode(1, 2, 3); // "86Rf07"
 int[] numbers = sqids.Decode(id); // new[] { 1, 2, 3 }
 ```
 
@@ -112,7 +112,7 @@ var sqids = new SqidsEncoder<int>(new()
 > It's recommended that you at least provide a shuffled alphabet when using Sqids — even if you want to use the same characters as those in the default alphabet — so that your IDs will be unique to you. You can use an online tool like [this one](https://codebeautify.org/shuffle-letters) to do that.
 
 > **Warning**
-> Sqids needs an alphabet that contains at least 5 unique characters.
+> The alphabet needs to contain at least 3 unique characters.
 
 #### Minimum Length:
 
