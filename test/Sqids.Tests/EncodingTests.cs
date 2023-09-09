@@ -26,7 +26,7 @@ public class EncodingTests
 #endif
 
 		sqids.Encode(number).ShouldBe(id);
-		sqids.Decode(id).ShouldBeEquivalentTo(new[] { number });
+		sqids.Decode(id).ShouldBe(new[] { number });
 	}
 
 	// NOTE: Simple case
@@ -65,7 +65,7 @@ public class EncodingTests
 
 		sqids.Encode(numbers).ShouldBe(id);
 		sqids.Encode(numbers.ToList()).ShouldBe(id); // NOTE: Selects the `IEnumerable<int>` overload
-		sqids.Decode(id).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(id).ShouldBe(numbers);
 	}
 
 	[TestCase(new[] { 0, 0, 0, 1, 2, 3, 100, 1_000, 100_000, 1_000_000, int.MaxValue })]
@@ -85,7 +85,7 @@ public class EncodingTests
 		var sqids = new SqidsEncoder();
 #endif
 
-		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(sqids.Encode(numbers)).ShouldBe(numbers);
 	}
 
 	[TestCase("*")] // NOTE: Character not found in the alphabet
@@ -127,7 +127,7 @@ public class EncodingTests
 	) where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 	{
 		var sqids = new SqidsEncoder<T>();
-		sqids.Decode(sqids.Encode(number)).ShouldBeEquivalentTo(new[] { number });
+		sqids.Decode(sqids.Encode(number)).ShouldBe(new[] { number });
 	}
 
 	[TestCaseSource(nameof(MultipleNumbersOfDifferentIntegerTypesTestCaseSource))]
@@ -136,7 +136,7 @@ public class EncodingTests
 	) where T : unmanaged, IBinaryInteger<T>, IMinMaxValue<T>
 	{
 		var sqids = new SqidsEncoder<T>();
-		sqids.Decode(sqids.Encode(numbers)).ShouldBeEquivalentTo(numbers);
+		sqids.Decode(sqids.Encode(numbers)).ShouldBe(numbers);
 	}
 
 	private static TestCaseData[] MultipleNumbersOfDifferentIntegerTypesTestCaseSource => new TestCaseData[]
