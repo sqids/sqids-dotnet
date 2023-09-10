@@ -77,15 +77,15 @@ var sqids = new SqidsEncoder();
 #### Single number:
 
 ```cs
-string id = sqids.Encode(1); // "Uk"
-int number = sqids.Decode(id).Single(); // 1
+var id = sqids.Encode(1); // "Uk"
+var number = sqids.Decode(id).Single(); // 1
 ```
 
 #### Multiple numbers:
 
 ```cs
-string id = sqids.Encode(1, 2, 3); // "86Rf07"
-int[] numbers = sqids.Decode(id); // new[] { 1, 2, 3 }
+var id = sqids.Encode(1, 2, 3); // "86Rf07"
+var numbers = sqids.Decode(id); // [1, 2, 3]
 ```
 
 > **Note**
@@ -164,7 +164,7 @@ Due to the design of Sqids's algorithm, decoding random IDs can sometimes produc
 The best way to mitigate this is to check if an ID is "canonical" before using its decoded value to do a database lookup, for example; and this can be done by simply re-encoding the decoded number(s) and checking if the result matches the incoming ID:
 
 ```cs
-int[] numbers = sqids.Decode(input);
+var numbers = sqids.Decode(input);
 bool isCanonical = input == sqids.Encode(numbers); // If `input` is `OSc`, this evaluates to `true` (because that's the canonical encoding of `3168`), and if `input` is `2fs`, it evaluates to `false`.
 ```
 

@@ -6,10 +6,11 @@ Sqids (_pronounced "squids"_) is a small library that lets you generate YouTube-
 
 ```cs
 using Sqids;
-var sqids = new SqidsEncoder();
 
-string id = sqids.Encode(1, 2, 3); // "8QRLaD"
-int[] numbers = sqids.Decode(id); // new[] { 1, 2, 3 }
+var sqids = new SqidsEncoder<int>();
+
+var id = sqids.Encode(1, 2, 3); // "86Rf07"
+var numbers = sqids.Decode(id); // [1, 2, 3]
 ```
 
-> **Note:** For more documentation and examples, check out the [GitHub repository](https://github.com/sqids/sqids-dotnet).
+> **Note:** For the full documentation and other examples, check out the [GitHub repository](https://github.com/sqids/sqids-dotnet).
