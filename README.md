@@ -35,7 +35,8 @@
 -   🤹‍♀️ **Randomized Output:** Encoding sequential numbers (1, 2, 3...) yields completely different-looking IDs.
 -   💪 **Supports All Integral Types:** Powered by .NET 7's [generic math](https://learn.microsoft.com/en-us/dotnet/standard/generics/math) — you could use Sqids to encode/decode numbers of any integral numeric type in .NET, including `int`, `long`, `ulong`, `byte`, etc.
 -   ⚡ **Blazingly Fast:** With an optimized span-based implementation that minimizes memory allocation and maximizes performance.
--   ✅ **Meticulously Tested:** Sqids has a comprehensive test suite that covers numerous edge cases, so you can expect a bug-free experience.
+-   🔍 **Meticulously Tested:** Sqids has a comprehensive test suite that covers numerous edge cases, so you can expect a bug-free experience.
+-   ✅ **CLS-Compliant:** Sqids can be used with any .NET language, not just C#. You can use Sqids just as easily with F#, for example.
 
 ## Getting Started
 
