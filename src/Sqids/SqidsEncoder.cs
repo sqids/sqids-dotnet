@@ -205,7 +205,6 @@ public sealed class SqidsEncoder
 		offset = (numbers.Length + offset) % _alphabet.Length;
 		offset = (offset + increment) % _alphabet.Length;
 
-		// TODO: `sizeof(T)` doesn't work, so we resorted to `sizeof(long)`, but ideally we should get it to work somehow — see https://github.com/sqids/sqids-dotnet/pull/15#issue-1872663234
 		Span<char> alphabetTemp = _alphabet.Length * sizeof(char) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
 			? new char[_alphabet.Length]
 			: stackalloc char[_alphabet.Length];
