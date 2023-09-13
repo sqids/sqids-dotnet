@@ -112,7 +112,7 @@ public sealed class SqidsEncoder
 		);
 		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
-		_alphabet = options.Alphabet.ToArray();
+		_alphabet = options.Alphabet.ToCharArray();
 		ConsistentShuffle(_alphabet);
 	}
 
