@@ -112,13 +112,8 @@ public sealed class SqidsEncoder
 		);
 		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
-		// TODO: `sizeof(T)` doesn't work, so we resorted to `sizeof(long)`, but ideally we should get it to work somehow — see https://github.com/sqids/sqids-dotnet/pull/15#issue-1872663234
-		Span<char> shuffledAlphabet = options.Alphabet.Length * sizeof(long) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
-			? new char[options.Alphabet.Length]
-			: stackalloc char[options.Alphabet.Length];
-		options.Alphabet.AsSpan().CopyTo(shuffledAlphabet);
-		ConsistentShuffle(shuffledAlphabet);
-		_alphabet = shuffledAlphabet.ToArray();
+		_alphabet = options.Alphabet.ToArray();
+		ConsistentShuffle(_alphabet);
 	}
 
 	/// <summary>
@@ -210,7 +205,7 @@ public sealed class SqidsEncoder
 		offset = (numbers.Length + offset) % _alphabet.Length;
 		offset = (offset + increment) % _alphabet.Length;
 
-		Span<char> alphabetTemp = _alphabet.Length * sizeof(char) > MaxStackallocSize
+		Span<char> alphabetTemp = _alphabet.Length * sizeof(char) > MaxStackallocSize // NOTE: We multiply the number of characters by the size of a `char` to get the actual amount of memory that would be allocated.
 			? new char[_alphabet.Length]
 			: stackalloc char[_alphabet.Length];
 		var alphabetSpan = _alphabet.AsSpan();
