@@ -158,15 +158,16 @@ public sealed class SqidsEncoder
 		if (numbers.Length == 0)
 			return string.Empty;
 
+		foreach (var number in numbers)
 #if NET7_0_OR_GREATER
-		if (numbers.Any(n => n < T.Zero))
+			if (number < T.Zero)
 #else
-		if (numbers.Any(n => n < 0))
+			if (number < 0)
 #endif
-			throw new ArgumentOutOfRangeException(
-				nameof(numbers),
-				"Encoding is only supported for zero and positive numbers."
-			);
+				throw new ArgumentOutOfRangeException(
+					nameof(numbers),
+					"Encoding is only supported for zero and positive numbers."
+				);
 
 		return Encode(numbers.AsSpan());
 	}
