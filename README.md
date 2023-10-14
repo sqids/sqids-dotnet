@@ -22,21 +22,21 @@
 	</a>
 </p>
 <p align="center">
-	Sqids (<em>pronounced "squids"</em>) is a small library that lets you generate YouTube-like IDs from numbers. It encodes numbers like <code>127</code> into strings like <code>yc3</code>, which you can then decode back into the original numbers. Sqids is useful for when you want to hide numbers (like sequential numeric IDs) into random-looking strings to be used in URLs and elsewhere.
+	Sqids (<em>pronounced "squids"</em>) is a small library that lets you generate YouTube-like IDs from numbers. It encodes numbers like <code>127</code> into strings like <code>yc3</code>, which you can then decode back into the original numbers. Sqids comes in handy when you want to obfuscate numbers (such as sequential numeric IDs) into random-looking strings, to be used in URLs and elsewhere.
 </p>
 
 ---
 
 ## Features:
 
--   💎 **Unique IDs:** The IDs that Sqids generates are unique and always decode into the same numbers. You can also make them unique to your application (so that they're not the same as everyone else who uses Sqids) by providing a [shuffled alphabet](#custom-alphabet).
--   🔢 **Multiple Numbers:** You can bundle more than one number into one string, and then decode the string back to the same set of numbers.
+-   💎 **Collision-free:** The IDs that Sqids generates are unique and can always be decoded back into the original numbers. You can also make them unique to your application (so that they're not the same as everyone else who uses Sqids) by providing a [shuffled alphabet](#custom-alphabet).
+-   🔢 **Multiple Numbers:** You can bundle more than one number into a single ID, and then decode the ID back into the same set of numbers.
 -   👁 **"Eye-safe":** Sqids makes sure that the IDs it generates do not contain common profanity, so you can safely use these IDs where end-users can see them (e.g. in URLs).
 -   🤹‍♀️ **Randomized Output:** Encoding sequential numbers (1, 2, 3...) yields completely different-looking IDs.
 -   💪 **Supports All Integral Types:** Powered by .NET 7's [generic math](https://learn.microsoft.com/en-us/dotnet/standard/generics/math) — you could use Sqids to encode/decode numbers of any integral numeric type in .NET, including `int`, `long`, `ulong`, `byte`, etc.
 -   ⚡ **Blazingly Fast:** With an optimized span-based implementation that minimizes memory allocation and maximizes performance.
 -   🔍 **Meticulously Tested:** Sqids has a comprehensive test suite that covers numerous edge cases, so you can expect a bug-free experience.
--   ✅ **CLS-Compliant:** Sqids can be used with any .NET language, not just C#. You can use Sqids just as easily with F#, for example.
+-   ✅ **CLS-compliant:** Sqids can be used with any .NET language, not just C#. You can use Sqids just as easily with F#, for example.
 
 ## Getting Started
 
@@ -112,8 +112,8 @@ var sqids = new SqidsEncoder<int>(new()
 > **Note**
 > It's recommended that you at least provide a shuffled alphabet when using Sqids — even if you want to use the same characters as those in the default alphabet — so that your IDs will be unique to you. You can use an online tool like [this one](https://codebeautify.org/shuffle-letters) to do that.
 
-> **Warning**
-> The alphabet needs to contain at least 3 unique characters.
+> **Note**
+> The alphabet needs to be at least _3 characters_.
 
 #### Minimum Length:
 
@@ -145,7 +145,7 @@ var sqids = new SqidsEncoder<int>(new()
 
 #### Decoding a single number:
 
-If you're decoding user-provided input and expect a single number, you can use C#'s pattern matching feature to do the necessary check and extract the number in one go:
+If you're decoding user-provided input and expect a single number, you can use C#'s pattern matching feature to perform the necessary check and extract the number in one go:
 
 ```cs
 if (sqids.Decode(input) is [var singleNumber])
@@ -159,22 +159,28 @@ if (sqids.Decode(input) is [var singleNumber])
 
 #### Ensuring an ID is "canonical":
 
-Due to the design of Sqids's algorithm, decoding random IDs can sometimes produce the same numbers. For example, with the default options, both `2fs` and `OSc` are decoded into the number `3168`. This can be problematic in certain cases, such as when you're using these IDs as part of your URLs to identify resources; this way, the fact that more than one ID decodes into the same number means the same resource would be accessible with two different URLs, which is often undesirable.
+Due to the design of Sqids's algorithm, decoding random strings (although only those that consist of characters found in the alphabet) can sometimes produce actual numbers. For example, with the default options, both `2fs` and `OSc` are decoded into the same number `3168` — even though if we try to encode `3168`, the result will be `OSc`, so `OSc` is the so-called "canonical" encoding of `3168`.
 
-The best way to mitigate this is to check if an ID is "canonical" before using its decoded value to do a database lookup, for example; and this can be done by simply re-encoding the decoded number(s) and checking if the result matches the incoming ID:
+As you can probably imagine, this would be problematic in certain cases, such as when you're using these IDs as part of your URLs to identify resources; in such a case, the fact that more than one ID decodes into the same number means the same resource would be accessible via multiple different URLs, which is normally undesirable.
+
+There is, however, a straightforward solution to this problem, which involves ensuring that the incoming ID is "canonical" before using its decoded value for further processing (e.g. doing a database lookup); and this can be done by simply re-encoding the decoded number(s) and making sure the result matches the original ID supplied by the client:
 
 ```cs
-var numbers = sqids.Decode(input);
-bool isCanonical = input == sqids.Encode(numbers); // If `input` is `OSc`, this evaluates to `true` (because that's the canonical encoding of `3168`), and if `input` is `2fs`, it evaluates to `false`.
+var decoded = sqids.Decode(incomingId);
+bool isCanonical = incomingId == sqids.Encode(decoded); // If `incomingId` is `OSc`, this evaluates to `true` (because that's the canonical encoding of `3168`), and if `incomingId` is `2fs`, it evaluates to `false`.
 ```
 
-You can combine this check with the check for a single number (the previous example) like so:
+You can nicely combine this check with the check for a single number (the previous example) like so:
 
 ```cs
-if (sqids.Decode(input) is [var id] &&
-    input == sqids.Encode(id))
+if (sqids.Decode(incomingId) is [var decodedId] &&
+    incomingId == sqids.Encode(decodedId))
 {
-    // `input` decodes into a single number and is canonical, now you can safely use it
+    // `incomingId` decodes into a single number and is canonical, here you can safely proceed with the rest of the logic
+}
+else
+{
+    // consider `incomingId` invalid — e.g. respond with 404
 }
 ```
 
