@@ -141,9 +141,13 @@ public sealed class SqidsEncoder
 				nameof(number),
 				"Encoding is only supported for zero and positive numbers."
 			);
+
+		return Encode(stackalloc[] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
 #endif
 
-		return Encode([number]); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
+#if NET8_0_OR_GREATER
+		return Encode([number]);
+#endif
 	}
 
 	/// <summary>
