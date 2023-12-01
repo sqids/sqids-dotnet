@@ -110,7 +110,7 @@ public sealed class SqidsEncoder
 			w.Any(c => !options.Alphabet.Contains(c, StringComparison.OrdinalIgnoreCase))
 #endif
 		);
-		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
+		_blockList = [.. options.BlockList]; // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
 		_alphabet = options.Alphabet.ToCharArray();
 		ConsistentShuffle(_alphabet);
@@ -129,7 +129,10 @@ public sealed class SqidsEncoder
 	public string Encode(int number)
 #endif
 	{
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
+		ArgumentOutOfRangeException.ThrowIfLessThan(number, T.Zero, nameof(number));
+#else
+#if NET7_0
 		if (number < T.Zero)
 #else
 		if (number < 0)
@@ -140,6 +143,11 @@ public sealed class SqidsEncoder
 			);
 
 		return Encode(stackalloc[] { number }); // NOTE: We use `stackalloc` here in order not to incur the cost of allocating an array on the heap, since we know the array will only have one element, we can use `stackalloc` safely.
+#endif
+
+#if NET8_0_OR_GREATER
+		return Encode([number]);
+#endif
 	}
 
 	/// <summary>
@@ -159,7 +167,10 @@ public sealed class SqidsEncoder
 			return string.Empty;
 
 		foreach (var number in numbers)
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
+			ArgumentOutOfRangeException.ThrowIfLessThan(number, T.Zero, nameof(numbers));
+#else
+#if NET7_0
 			if (number < T.Zero)
 #else
 			if (number < 0)
@@ -168,6 +179,7 @@ public sealed class SqidsEncoder
 					nameof(numbers),
 					"Encoding is only supported for zero and positive numbers."
 				);
+#endif
 
 		return Encode(numbers.AsSpan());
 	}
@@ -387,13 +399,13 @@ public sealed class SqidsEncoder
 		do
 		{
 			id.Insert(0, alphabet[int.CreateChecked(result % T.CreateChecked(alphabet.Length))]);
-			result = result / T.CreateChecked(alphabet.Length);
+			result /= T.CreateChecked(alphabet.Length);
 		} while (result > T.Zero);
 #else
 		do
 		{
 			id.Insert(0, alphabet[result % alphabet.Length]);
-			result = result / alphabet.Length;
+			result /= alphabet.Length;
 		} while (result > 0);
 #endif
 

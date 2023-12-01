@@ -32,8 +32,8 @@ public sealed class SqidsOptions
 	/// <summary>
 	/// List of blocked words that must not appear in the IDs.
 	/// </summary>
-	public HashSet<string> BlockList { get; set; } = new()
-	{
+	public HashSet<string> BlockList { get; set; } =
+	[
 		"0rgasm",
 		"1d10t",
 		"1d1ot",
@@ -594,5 +594,5 @@ public sealed class SqidsOptions
 		"zocc0la",
 		"zocco1a",
 		"zoccola"
-	};
+	];
 }
