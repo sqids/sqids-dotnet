@@ -71,13 +71,13 @@ public sealed class SqidsEncoder
 
 		if (options.Alphabet.Distinct().Count() != options.Alphabet.Length)
 			throw new ArgumentOutOfRangeException(
-				nameof(options.MinLength),
+				nameof(options.Alphabet),
 				"The alphabet must not contain duplicate characters."
 			);
 
 		if (Encoding.UTF8.GetByteCount(options.Alphabet) != options.Alphabet.Length)
 			throw new ArgumentOutOfRangeException(
-				nameof(options.MinLength),
+				nameof(options.Alphabet),
 				"The alphabet must not contain multi-byte characters."
 			);
 
