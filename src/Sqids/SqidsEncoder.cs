@@ -403,21 +403,26 @@ public sealed class SqidsEncoder
 	private static int ToId(int num, ReadOnlySpan<char> alphabet, Span<char> buffer)
 #endif
 	{
-		var result = num;
 		int offset = buffer.Length - 1; // NOTE: Start at the end of the buffer
+
+#if NET7_0_OR_GREATER
+		T alphaLen = T.CreateChecked(alphabet.Length);
+#else
+		int alphaLen = alphabet.Length;
+#endif
 
 #if NET7_0_OR_GREATER
 		do
 		{
-			buffer[offset--] = alphabet[int.CreateChecked(result % T.CreateChecked(alphabet.Length))];
-			result /= T.CreateChecked(alphabet.Length);
-		} while (result > T.Zero);
+			buffer[offset--] = alphabet[int.CreateChecked(num % alphaLen)];
+			num /= alphaLen;
+		} while (num > T.Zero);
 #else
 		do
 		{
-			buffer[offset--] = alphabet[result % alphabet.Length];
-			result /= alphabet.Length;
-		} while (result > 0);
+			buffer[offset--] = alphabet[num % alphaLen];
+			num /= alphaLen;
+		} while (num > 0);
 #endif
 		// NOTE: Return how much we have written back to the caller
 		return buffer.Length - offset - 1;
