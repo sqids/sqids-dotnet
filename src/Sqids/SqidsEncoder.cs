@@ -96,21 +96,28 @@ public sealed class SqidsEncoder
 		_minLength = options.MinLength;
 
 		// NOTE: Cleanup the blocklist:
-		options.BlockList = new HashSet<string>(
-			options.BlockList,
+		HashSet<string> blockList = new HashSet<string>(
 			StringComparer.OrdinalIgnoreCase // NOTE: Effectively removes items that differ only in casing — leaves one version of each word casing-wise which will then be compared against the generated IDs case-insensitively
 		);
-		options.BlockList.RemoveWhere(w =>
-			// NOTE: Removes words that are less than 3 characters long
-			w.Length < 3 ||
-			// NOTE: Removes words that contain characters not found in the alphabet
+
+		foreach (string w in options.BlockList)
+		{
+			if (
+				// NOTE: Removes words that are less than 3 characters long
+				w.Length < 3 ||
+				// NOTE: Removes words that contain characters not found in the alphabet
 #if NETSTANDARD2_0
-			w.Any(c => options.Alphabet.IndexOf(c.ToString(), StringComparison.OrdinalIgnoreCase) == -1) // NOTE: A `string.Contains` overload with `StringComparison` didn't exist prior to .NET Standard 2.1, so we have to resort to `IndexOf` — see https://stackoverflow.com/a/52791476
+				w.Any(c => options.Alphabet.IndexOf(c.ToString(), StringComparison.OrdinalIgnoreCase) == -1) // NOTE: A `string.Contains` overload with `StringComparison` didn't exist prior to .NET Standard 2.1, so we have to resort to `IndexOf` — see https://stackoverflow.com/a/52791476
 #else
-			w.Any(c => !options.Alphabet.Contains(c, StringComparison.OrdinalIgnoreCase))
+				w.Any(c => !options.Alphabet.Contains(c, StringComparison.OrdinalIgnoreCase))
 #endif
-		);
-		_blockList = options.BlockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
+				)
+				continue;
+
+			blockList.Add(w);
+		}
+
+		_blockList = blockList.ToArray(); // NOTE: Arrays are faster to iterate than HashSets, so we construct an array here.
 
 		_alphabet = options.Alphabet.ToCharArray();
 		ConsistentShuffle(_alphabet);
