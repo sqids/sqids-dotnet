@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- NOTE: `net472` is used for testing `netstandard2.0` -->
+		<TargetFrameworks>net472;net6.0;net7.0;net8.0</TargetFrameworks>
+		<LangVersion>12.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputType>exe</OutputType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Sqids\Sqids.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+	</ItemGroup>
+
+</Project>
