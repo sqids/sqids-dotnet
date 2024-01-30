@@ -396,16 +396,23 @@ public sealed class SqidsEncoder
 		var result = num;
 
 #if NET7_0_OR_GREATER
+		T alphaLen = T.CreateChecked(alphabet.Length);
+#else
+		int alphaLen = alphabet.Length;
+#endif
+
+
+#if NET7_0_OR_GREATER
 		do
 		{
-			id.Insert(0, alphabet[int.CreateChecked(result % T.CreateChecked(alphabet.Length))]);
-			result /= T.CreateChecked(alphabet.Length);
+			id.Insert(0, alphabet[int.CreateChecked(result % alphaLen)]);
+			result /= T.CreateChecked(alphaLen);
 		} while (result > T.Zero);
 #else
 		do
 		{
-			id.Insert(0, alphabet[result % alphabet.Length]);
-			result /= alphabet.Length;
+			id.Insert(0, alphabet[result % alphaLen]);
+			result /= alphaLen;
 		} while (result > 0);
 #endif
 
