@@ -237,12 +237,14 @@ public sealed class SqidsEncoder
 		var builder = new StringBuilder(); // TODO: pool a la Hashids.net?
 		builder.Append(prefix);
 
+		Span<char> idBuffer = stackalloc char[64]; //NOTE: The smallest alphabet (3 chars) with the largest value (ulong.MaxValue) needs 64 chars
+
 		for (int i = 0; i < numbers.Length; i++)
 		{
 			var number = numbers[i];
 			var alphabetWithoutSeparator = alphabetTemp[1..]; // NOTE: Excludes the first character — which is the separator
-			var encodedNumber = ToId(number, alphabetWithoutSeparator);
-			builder.Append(encodedNumber);
+			int written = ToId(number, alphabetWithoutSeparator, idBuffer);
+			builder.Append(idBuffer[^written..]); // NOTE: The buffer is written from the end towards the beginning
 
 			if (i >= numbers.Length - 1) // NOTE: If the last one
 				continue;
@@ -393,29 +395,37 @@ public sealed class SqidsEncoder
 	}
 
 #if NET7_0_OR_GREATER
-	private static ReadOnlySpan<char> ToId(T num, ReadOnlySpan<char> alphabet)
+	private static int ToId(T num, ReadOnlySpan<char> alphabet, Span<char> buffer)
 #else
-	private static ReadOnlySpan<char> ToId(int num, ReadOnlySpan<char> alphabet)
+	private static int ToId(int num, ReadOnlySpan<char> alphabet, Span<char> buffer)
 #endif
 	{
-		var id = new StringBuilder();
 		var result = num;
+		int offset = buffer.Length - 1; // NOTE: Start at the end of the buffer
+
+#if NET7_0_OR_GREATER
+		T alphaLen = T.CreateChecked(alphabet.Length);
+#else
+		int alphaLen = alphabet.Length;
+#endif
+
 
 #if NET7_0_OR_GREATER
 		do
 		{
-			id.Insert(0, alphabet[int.CreateChecked(result % T.CreateChecked(alphabet.Length))]);
-			result /= T.CreateChecked(alphabet.Length);
+			buffer[offset--] = alphabet[int.CreateChecked(result % alphaLen)];
+			result /= T.CreateChecked(alphaLen);
 		} while (result > T.Zero);
 #else
 		do
 		{
-			id.Insert(0, alphabet[result % alphabet.Length]);
-			result /= alphabet.Length;
+			buffer[offset--] = alphabet[result % alphaLen];
+			result /= alphaLen;
 		} while (result > 0);
 #endif
 
-		return id.ToString().AsSpan(); // TODO: possibly avoid creating a string
+		// NOTE: Return how much we have written back to the caller
+		return buffer.Length - offset - 1;
 	}
 
 #if NET7_0_OR_GREATER
