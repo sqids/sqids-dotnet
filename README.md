@@ -209,7 +209,7 @@ And then you can inject it anywhere you need it:
 ```cs
 public class SomeController(SqidsEncoder<int> sqids)
 {
-    _sqids = sqids;
+    // ...
 }
 ```
 
