@@ -207,13 +207,9 @@ services.AddSingleton(new SqidsEncoder<int>(new()
 And then you can inject it anywhere you need it:
 
 ```cs
-public class SomeController
+public class SomeController(SqidsEncoder<int> sqids)
 {
-    private readonly SqidsEncoder<int> _sqids;
-    public SomeController(SqidsEncoder<int> sqids)
-    {
-        _sqids = sqids;
-    }
+    _sqids = sqids;
 }
 ```
 
