@@ -128,7 +128,7 @@ var sqids = new SqidsEncoder<int>(new()
 
 #### Custom Blocklist:
 
-Sqids comes with a large default blocklist which will ensure that common cruse words and such never appear anywhere in your IDs.
+Sqids comes with a large default blocklist which will ensure that common curse words and such never appear anywhere in your IDs.
 You can add extra items to this default blocklist like so:
 
 ```cs
