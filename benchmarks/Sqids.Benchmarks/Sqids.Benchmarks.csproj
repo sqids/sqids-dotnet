@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <LangVersion>latest</LangVersion>
+        <TargetFrameworks>net48;net7.0;net8.0</TargetFrameworks>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <BenchmarksPackageVersion Condition="'$(BenchmarksPackageVersion)' == ''">3.2.0</BenchmarksPackageVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(BenchmarksPackageVersion)' == '3.2.0'">
+        <DefineConstants>$(DefineConstants);WITH_LONG_SUPPORT</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+        <PackageReference Include="Sqids" Version="$(BenchmarksPackageVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EditorConfigFiles Remove="C:\work\GitHub\sqids-dotnet\benchmarks\Sqids.Benchmarks\.editorconfig" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="C:\work\GitHub\sqids-dotnet\benchmarks\Sqids.Benchmarks\.editorconfig" />
+    </ItemGroup>
+
+</Project>
